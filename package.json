@@ -1,0 +1,22 @@
+{
+  "name": "atomiql",
+  "version": "1.0.0",
+  "description": "## Contributors",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oslabs-beta/AtomiQL.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oslabs-beta/AtomiQL/issues"
+  },
+  "homepage": "https://github.com/oslabs-beta/AtomiQL#readme",
+  "dependencies": {
+    "react": "^17.0.2"
+  }
+}
