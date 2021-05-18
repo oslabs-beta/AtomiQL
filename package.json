@@ -1,22 +1,22 @@
 {
-  "name": "atomiql",
+  "name": "typescript-package",
   "version": "1.0.0",
-  "description": "## Contributors",
-  "main": "index.js",
+  "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/oslabs-beta/AtomiQL.git"
-  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/oslabs-beta/AtomiQL/issues"
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "prepublish": "tsc",
+  "devDependencies": {
+    "@types/react": "^17.0.5"
   },
-  "homepage": "https://github.com/oslabs-beta/AtomiQL#readme",
-  "dependencies": {
+  "peerDependencies": {
+    "graphql-request": "^3.4.0",
+    "jotai": "^0.16.4",
     "react": "^17.0.2"
   }
 }
