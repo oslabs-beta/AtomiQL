@@ -7,7 +7,7 @@ export const AppContext = React.createContext({
 type MyProps = { children: React.ReactNode; url: string; };
 type MyState = { url: string };
 
-export class AtomiProvider extends React.Component<MyProps, MyState> {
+export default class AtomiProvider extends React.Component<MyProps, MyState> {
   constructor(props: MyProps) {
     super(props)
     this.state = {
