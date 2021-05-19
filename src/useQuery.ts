@@ -1,4 +1,4 @@
-import {atom, useAtom } from 'jotai'
+import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
 import { useEffect, useContext } from 'react';
 import { AppContext } from './atomiContext';
@@ -6,35 +6,35 @@ import { AppContext } from './atomiContext';
 const newAtom = atom({
   loading: true,
   data: null,
-  hasError: false
+  hasError: false,
 });
 
 const useQuery = (query: string): [any, boolean, boolean] => {
-  const [atomData, setAtom] = useAtom(newAtom)
+  const [atomData, setAtom] = useAtom(newAtom);
   // const url = 'https://graphql-pokemon2.vercel.app';
   const { loading, hasError, data } = atomData;
-  const { url } = useContext(AppContext)
+  const { url } = useContext(AppContext);
 
   useEffect(() => {
     (async () => {
       try {
-        const result = await request(url, query)
+        const result = await request(url, query);
         setAtom({
           data: result,
           loading: false,
-          hasError: false
-        })
+          hasError: false,
+        });
       } catch {
         setAtom({
           data: null,
           loading: false,
-          hasError: true
-        })
+          hasError: true,
+        });
       }
-    })()
+    })();
   }, []);
 
-  return [data, loading, hasError]
+  return [data, loading, hasError];
 };
 
 export default useQuery;
