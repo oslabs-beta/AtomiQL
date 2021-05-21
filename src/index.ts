@@ -5,6 +5,3 @@ export {
   AtomiProvider,
   useQuery
 };
-
-// export default AtomiProvider;
-// export default useQuery;

@@ -17,6 +17,6 @@
   "peerDependencies": {
     "graphql-request": "^3.4.0",
     "jotai": "^0.16.4",
-    "react": "^17.0.2"
+    "react": "^16.*"
   }
 }
