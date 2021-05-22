@@ -9,9 +9,9 @@ const newAtom = atom({
   hasError: false,
 });
 
+
 const useQuery = (query: string): [any, boolean, boolean] => {
   const [atomData, setAtom] = useAtom(newAtom);
-  // const url = 'https://graphql-pokemon2.vercel.app';
   const { loading, hasError, data } = atomData;
   const { url } = useContext(AppContext);
 
@@ -36,5 +36,10 @@ const useQuery = (query: string): [any, boolean, boolean] => {
 
   return [data, loading, hasError];
 };
+
+export const getAtom = ():any => {
+  const [atomData] = useAtom(newAtom)
+  return atomData
+}
 
 export default useQuery;
