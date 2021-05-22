@@ -11,30 +11,55 @@ const newAtom = atom({
 
 
 const useQuery = (query: string): [any, boolean, boolean] => {
-  const [atomData, setAtom] = useAtom(newAtom);
-  const { loading, hasError, data } = atomData;
-  const { url } = useContext(AppContext);
+  //pull cache from context
+    //check if query is an object on context.cache
+    //if yes, do something
+    //if not, then proceed as normal
+  //const [atomData, setAtom] etc.
+    //useEffect...
+    //return [data, loading, hasErrror]
+    //write to cache {'querytext': atomData}
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const result = await request(url, query);
-        setAtom({
-          data: result,
-          loading: false,
-          hasError: false,
-        });
-      } catch {
-        setAtom({
-          data: null,
-          loading: false,
-          hasError: true,
-        });
-      }
-    })();
-  }, []);
+  const { url, cache, setCache } = useContext(AppContext);
+  console.log('url', url);
+  console.log('cache', cache);
 
-  return [data, loading, hasError];
+  if (cache[query]) {
+    console.log('you did it!');
+    const { loading, hasError, data } = cache[query];
+    return [data, loading, hasError];
+    
+  } else {
+    const [atomData, setAtom] = useAtom(newAtom)
+    const { loading, hasError, data } = atomData;
+    useEffect(() => {
+      (async () => {
+        try {
+          const result = await request(url, query)
+          console.log('result', result);
+          setAtom({
+            data: result,
+            loading: false,
+            hasError: false
+          });
+        } catch {
+          console.log('catch');
+          setAtom({
+            data: null,
+            loading: false,
+            hasError: true
+          })
+        }
+      })()
+    }, []);
+
+    useEffect(() => {
+      console.log('AtomData: ', atomData);
+      if (!loading) setCache(query, atomData);
+    }, [atomData]);
+
+    return [data, loading, hasError];
+  }
 };
 
 export const getAtom = ():any => {
