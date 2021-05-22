@@ -12,7 +12,6 @@ type MyState = {
 export default class AtomiProvider extends React.Component<MyProps, MyState> {
   constructor(props: MyProps) {
     super(props);
-    this.setCache = this.setCache.bind(this);
     this.state = {
       url: props.url,
       cache: {},
