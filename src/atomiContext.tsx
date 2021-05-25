@@ -10,26 +10,29 @@ type MyState = {
 };
 
 export default class AtomiProvider extends React.Component<MyProps, MyState> {
+  cacheContainer: any;
+  cache: any;
   constructor(props: MyProps) {
     super(props);
-    this.state = {
-      url: props.url,
-      cache: {},
-      setCache: this.setCache
+    this.cacheContainer = {
+      url: this.props.url,
+      setCache: this.setCache,
+      cache: {}
     }
   }
 
+
+
   setCache = (query: string, atomData: object) => {
-    this.setState(
-      {
-        cache: {[query]: atomData, ...this.state.cache}
-      }
-    )
+    this.cacheContainer.cache = {
+      ...this.cache,
+      [query]: atomData
+    }
   }
 
   render() {
     return (
-      <AppContext.Provider value={this.state}> 
+      <AppContext.Provider value={this.cacheContainer}> 
         {this.props.children}
       </AppContext.Provider>
     );
