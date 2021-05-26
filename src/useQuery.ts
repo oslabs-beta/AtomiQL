@@ -3,14 +3,24 @@ import { request } from 'graphql-request';
 import { useEffect, useContext } from 'react';
 import { AppContext } from './atomiContext';
 
-const newAtom = atom({
+interface AtomData {
+  loading: boolean;
+  data: null | { [key: string]: any };
+  hasError: boolean;
+}
+
+type AtomDataArray = [null | { [key: string]: any }, boolean, boolean];
+
+const initialAtomData: AtomData = {
   loading: true,
   data: null,
   hasError: false,
-});
+}
+
+const newAtom = atom(initialAtomData);
 
 
-const useQuery = (query: string): [any, boolean, boolean] => {
+const useQuery = (query: string): AtomDataArray => {
   // pull cache from context
     // check if query is an object on context.cache
     // if yes, do something
@@ -24,14 +34,18 @@ const useQuery = (query: string): [any, boolean, boolean] => {
   console.log('url', url);
   console.log('cache', cache);
 
-  if (cache[query]) {
+  const cacheRespone = cache[query];
+
+  if (cacheRespone) {
     console.log('you did it!');
     const { loading, hasError, data } = cache[query];
     return [data, loading, hasError];
     
   }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [atomData, setAtom] = useAtom(newAtom)
   const { loading, hasError, data } = atomData;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     (async () => {
       try {
@@ -51,17 +65,21 @@ const useQuery = (query: string): [any, boolean, boolean] => {
         })
       }
     })()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     console.log('AtomData: ', atomData);
     if (!loading) setCache(query, atomData);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atomData]);
 
   return [data, loading, hasError];
 };
 
-export const getAtom = ():any => {
+export const getAtom = (): AtomData => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [atomData] = useAtom(newAtom)
   return atomData
 }

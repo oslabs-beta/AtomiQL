@@ -60,9 +60,8 @@ describe('UseQuery', () => {
       wrapper,
     });
     await waitForNextUpdate();
-   
 
-    expect(result.current[0].pokemons.length).toBe(3);
+    expect(result?.current[0]?.pokemons.length).toBe(3);
   });
 
   test('Data should be available in the Jotai atom', async () => {
@@ -86,7 +85,7 @@ describe('UseQuery', () => {
     await waitForNextUpdate();
 
     const { result } = renderHook(() => getAtom(), { wrapper });
-    expect(result.current.data.pokemons.length).toBe(3);
+    expect(result?.current?.data?.pokemons.length).toBe(3);
   });
 
   test('Ensure query is being stored on the cache', async () => {

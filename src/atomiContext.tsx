@@ -1,39 +1,52 @@
 import React from 'react';
 
-export const AppContext = React.createContext<Partial<MyProps>>({});
+interface MyProps {
+  url: string;
+}
 
-type MyProps = { children: React.ReactNode; url: string | any; cache?: any; setCache?: any };
-type MyState = { 
-  url: string, 
-  cache?: object,
-  setCache?: any
+interface CacheContainer {
+  url: string;
+  cache: { [key: string]: { [key: string]: any } };
+  setCache: (arg1: string, arg2: {}) => void;
 };
 
-export default class AtomiProvider extends React.Component<MyProps, MyState> {
-  cacheContainer: any;
-  cache: any;
+
+const initialCache: CacheContainer = {
+  url: '',
+  // eslint-disable-next-line no-unused-vars
+  setCache: (arg1: string, arg2: { [key: string]: any }) => { },
+  cache: {}
+}
+
+export const AppContext = React.createContext(initialCache)
+
+
+export default class AtomiProvider extends React.Component<MyProps> {
+  cacheContainer: CacheContainer;
+
   constructor(props: MyProps) {
     super(props);
-    this.cacheContainer = {
-      url: this.props.url,
+    const { url } = this.props;
+    const cacheContainer: CacheContainer = {
+      url,
       setCache: this.setCache,
       cache: {}
     }
+    this.cacheContainer = cacheContainer;
   }
 
-
-
-  setCache = (query: string, atomData: object) => {
+  setCache = (query: string, atomData: { [key: string]: any }) => {
     this.cacheContainer.cache = {
-      ...this.cache,
+      ...this.cacheContainer.cache,
       [query]: atomData
     }
   }
 
   render() {
+    const { children } = this.props;
     return (
-      <AppContext.Provider value={this.cacheContainer}> 
-        {this.props.children}
+      <AppContext.Provider value={this.cacheContainer}>
+        {children}
       </AppContext.Provider>
     );
   }
