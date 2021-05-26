@@ -1,3 +1,5 @@
+/* eslint no-console:0 */
+
 import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
 import { useEffect, useContext } from 'react';
@@ -17,33 +19,27 @@ const initialAtomData: AtomData = {
   hasError: false,
 }
 
+// use useref to create a new atom
 const newAtom = atom(initialAtomData);
 
 
 const useQuery = (query: string): AtomDataArray => {
-  // pull cache from context
-    // check if query is an object on context.cache
-    // if yes, do something
-    // if not, then proceed as normal
-  // const [atomData, setAtom] etc.
-    // useEffect...
-    // return [data, loading, hasErrror]
-    // write to cache {'querytext': atomData}
 
   const { url, cache, setCache } = useContext(AppContext);
   console.log('url', url);
   console.log('cache', cache);
 
-  const cacheRespone = cache[query];
+  const cacheResponse = cache[query];
 
-  if (cacheRespone) {
+  if (cacheResponse) {
     console.log('you did it!');
-    const { loading, hasError, data } = cache[query];
+    const [atomData] = useAtom(cache[query]);
+    const { loading, hasError, data } = atomData;
     return [data, loading, hasError];
     
   }
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [atomData, setAtom] = useAtom(newAtom)
+  const [atomData, setAtom] = useAtom(newAtom);
   const { loading, hasError, data } = atomData;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -70,8 +66,13 @@ const useQuery = (query: string): AtomDataArray => {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    console.log('AtomData: ', atomData);
-    if (!loading) setCache(query, atomData);
+    // console.log('AtomData: ', atomData);
+    console.log('newAtom', newAtom);
+    if (!loading) setCache(query, newAtom);
+
+    // if new query (new atom, no cache), setAtom (above) and store atom in cache
+    // if cached query (existing atom in cache), just update the atom but no need to edit cache
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atomData]);
 

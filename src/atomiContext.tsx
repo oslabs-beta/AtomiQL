@@ -35,11 +35,12 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  setCache = (query: string, atomData: { [key: string]: any }) => {
+  setCache = (query: string, atom: { [key: string]: any }) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
-      [query]: atomData
+      [query]: atom
     }
+    console.log(this.cacheContainer.cache);
   }
 
   render() {
