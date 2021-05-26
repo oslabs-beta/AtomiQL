@@ -80,8 +80,7 @@ const useQuery = (query: string): AtomDataArray => {
   return [data.current, loading.current, hasError.current];
 };
 
-export const getAtom = (): AtomData => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+export const GetAtom = (): AtomData => {
   const [atomData] = useAtom(newAtom);
   return atomData;
 };
