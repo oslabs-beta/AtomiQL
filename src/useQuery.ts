@@ -31,13 +31,10 @@ const useQuery = (query: string): AtomDataArray => {
     // write to cache {'querytext': atomData}
 
   const { url, cache, setCache } = useContext(AppContext);
-  console.log('url', url);
-  console.log('cache', cache);
 
   const cacheRespone = cache[query];
 
   if (cacheRespone) {
-    console.log('you did it!');
     const { loading, hasError, data } = cache[query];
     return [data, loading, hasError];
     
@@ -50,14 +47,12 @@ const useQuery = (query: string): AtomDataArray => {
     (async () => {
       try {
         const result = await request(url, query)
-        console.log('result', result);
         setAtom({
           data: result,
           loading: false,
           hasError: false
         });
       } catch {
-        console.log('catch');
         setAtom({
           data: null,
           loading: false,
@@ -70,7 +65,6 @@ const useQuery = (query: string): AtomDataArray => {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    console.log('AtomData: ', atomData);
     if (!loading) setCache(query, atomData);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atomData]);
