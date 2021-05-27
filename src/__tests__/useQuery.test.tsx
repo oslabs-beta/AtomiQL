@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { gql } from 'graphql-request';
-import useQuery, { getAtom } from '../useQuery';
+import useQuery, { GetAtom } from '../useQuery';
 import AtomiProvider, { AppContext } from '../atomiContext';
 
 describe('AtomiContext', () => {
@@ -84,7 +84,7 @@ describe('UseQuery', () => {
     });
     await waitForNextUpdate();
 
-    const { result } = renderHook(() => getAtom(), { wrapper });
+    const { result } = renderHook(() => GetAtom(), { wrapper });
     expect(result?.current?.data?.pokemons.length).toBe(3);
   });
 

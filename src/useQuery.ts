@@ -17,80 +17,63 @@ const initialAtomData: AtomData = {
   loading: true,
   data: null,
   hasError: false,
-}
+};
+
+const newAtom = atom(initialAtomData);
 
 const useQuery = (query: string): AtomDataArray => {
-  const newAtomRef = useRef(atom(initialAtomData));
-  // const newAtom = atom(initialAtomData);
-  console.log('newAtomRef', newAtomRef);
 
   const { url, cache, setCache } = useContext(AppContext);
-  console.log('url', url);
-  // console.log('cache', cache);
+  const loading = useRef(true);
+  const hasError = useRef(false);
+  const data = useRef<{ [key: string]: any; } | null>(null);
 
-  const cacheResponse = cache[query];
+  const [atomData, setAtom] = useAtom(newAtom);
+  loading.current = atomData.loading;
+  hasError.current = atomData.hasError;
+  data.current = atomData.data;
 
-  if (cacheResponse) {
-    console.log('you did it!');
-    // const [atomData, setAtom] = cache[query];
-    // const { loading, hasError, data } = atomData;
-    // return [data, loading, hasError];
-    
-  }
 
-  /*
-  if (cacheRespone) {
-    console.log('you did it!');
-    const { loading, hasError, data } = cache[query];
-    return [data, loading, hasError];
-  }
-  */
-  
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [atomData, setAtom] = useAtom(newAtomRef.current);
-  const { loading, hasError, data } = atomData;
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     (async () => {
       try {
-        const result = await request(url, query)
-        console.log('result', result);
-        setAtom({
-          data: result,
-          loading: false,
-          hasError: false
-        });
+        const cacheResponse = cache[query];
+        if (cacheResponse) {
+          // console.log('you did it!');
+          loading.current = cache[query].loading;
+          hasError.current = cache[query].hasError;
+          data.current = cache[query].current;
+        } else {
+          const result = await request(url, query);
+          // console.log('RESULT IS',result)
+          setCache(query, {
+            data: result,
+            loading: false,
+            hasError: false
+          });
+          setAtom({
+            data: result,
+            loading: false,
+            hasError: false,
+          });
+        }
       } catch {
-        console.log('catch');
         setAtom({
           data: null,
           loading: false,
-          hasError: true
-        })
+          hasError: true,
+        });
       }
-    })()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    })();
+    /* eslint react-hooks/exhaustive-deps:0 */
   }, []);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    // console.log('AtomData: ', atomData);
-    console.log('newAtom', newAtomRef);
-    if (!loading) setCache(query, newAtomRef.current);
-
-    // if new query (new atom, no cache), setAtom (above) and store atom in cache
-    // if cached query (existing atom in cache), just update the atom but no need to edit cache
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atomData]);
-
-  return [data, loading, hasError];
+  return [data.current, loading.current, hasError.current];
 };
 
-export const getAtom = (): AtomData => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [atomData] = useAtom(atom(initialAtomData))
-  return atomData
-}
+export const GetAtom = (): AtomData => {
+  const [atomData] = useAtom(newAtom);
+  return atomData;
+};
 
 export default useQuery;
