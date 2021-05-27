@@ -10,10 +10,13 @@ const initialData: AtomData = {
   hasError: false,
 };
 
+// interface MutationArg {
+//   variables?: {
+//     [key: string]: any
+//   }
+// }
 interface MutationArg {
-  variables?: {
     [key: string]: any
-  }
 }
 
 const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => {
@@ -30,7 +33,8 @@ const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => 
     });
     try {
       // const result = await request(url, query);
-      const result = await graphQLClient.request(query, mutationArg.variables);
+      // const result = await graphQLClient.request(query, mutationArg.variables);
+      const result = await graphQLClient.request(query, mutationArg);
       setResponse({
         data: result,
         loading: false,
