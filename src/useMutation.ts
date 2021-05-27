@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 // import { atom, useAtom } from 'jotai';
-import { request, GraphQLClient } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
 import { AppContext } from './atomiContext';
 import { AtomData } from './useQuery';
 
@@ -9,14 +9,8 @@ const initialData: AtomData = {
   data: null,
   hasError: false,
 };
-
-// interface MutationArg {
-//   variables?: {
-//     [key: string]: any
-//   }
-// }
 interface MutationArg {
-    [key: string]: any
+  [key: string]: any
 }
 
 const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => {
@@ -26,14 +20,11 @@ const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => 
   const graphQLClient = new GraphQLClient(url)
 
   const triggerMutation = async (mutationArg: MutationArg) => {
-    console.log(`mutationArg`, mutationArg)
     setResponse({
       ...response,
       loading: true,
     });
     try {
-      // const result = await request(url, query);
-      // const result = await graphQLClient.request(query, mutationArg.variables);
       const result = await graphQLClient.request(query, mutationArg);
       setResponse({
         data: result,
