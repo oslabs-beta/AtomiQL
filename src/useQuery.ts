@@ -32,24 +32,31 @@ const useQuery = (query: string): AtomDataArray => {
   const { url, cache, setCache } = useContext(AppContext);
   const loading = useRef(true);
   const hasError = useRef(false);
-  const data = useRef<{ [key: string]: any } | null>(null);
-  const cacheResponse = cache[query];
+  const data = useRef<{ [key: string]: any; } | null>(null);
+
   const [atomData, setAtom] = useAtom(newAtom);
   loading.current = atomData.loading;
   hasError.current = atomData.hasError;
   data.current = atomData.data;
 
+
   useEffect(() => {
     (async () => {
       try {
+        const cacheResponse = cache[query];
         if (cacheResponse) {
-          console.log('you did it!');
+          // console.log('you did it!');
           loading.current = cache[query].loading;
           hasError.current = cache[query].hasError;
           data.current = cache[query].current;
         } else {
           const result = await request(url, query);
-          console.log('result', result);
+          // console.log('RESULT IS',result)
+          setCache(query, {
+            data: result,
+            loading: false,
+            hasError: false
+          });
           setAtom({
             data: result,
             loading: false,
@@ -64,15 +71,7 @@ const useQuery = (query: string): AtomDataArray => {
         });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (!loading.current && !cache[query]) {
-      setCache(query, atomData);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atomData]);
 
   return [data.current, loading.current, hasError.current];
 };
