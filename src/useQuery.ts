@@ -2,7 +2,7 @@
 
 import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useRef } from 'react';
 import { AppContext } from './atomiContext';
 
 interface AtomData {
@@ -19,27 +19,35 @@ const initialAtomData: AtomData = {
   hasError: false,
 }
 
-// use useref to create a new atom
-const newAtom = atom(initialAtomData);
-
-
 const useQuery = (query: string): AtomDataArray => {
+  const newAtomRef = useRef(atom(initialAtomData));
+  // const newAtom = atom(initialAtomData);
+  console.log('newAtomRef', newAtomRef);
 
   const { url, cache, setCache } = useContext(AppContext);
   console.log('url', url);
-  console.log('cache', cache);
+  // console.log('cache', cache);
 
   const cacheResponse = cache[query];
 
   if (cacheResponse) {
     console.log('you did it!');
-    const [atomData] = useAtom(cache[query]);
-    const { loading, hasError, data } = atomData;
-    return [data, loading, hasError];
+    // const [atomData, setAtom] = cache[query];
+    // const { loading, hasError, data } = atomData;
+    // return [data, loading, hasError];
     
   }
+
+  /*
+  if (cacheRespone) {
+    console.log('you did it!');
+    const { loading, hasError, data } = cache[query];
+    return [data, loading, hasError];
+  }
+  */
+  
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [atomData, setAtom] = useAtom(newAtom);
+  const [atomData, setAtom] = useAtom(newAtomRef.current);
   const { loading, hasError, data } = atomData;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
@@ -67,8 +75,8 @@ const useQuery = (query: string): AtomDataArray => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     // console.log('AtomData: ', atomData);
-    console.log('newAtom', newAtom);
-    if (!loading) setCache(query, newAtom);
+    console.log('newAtom', newAtomRef);
+    if (!loading) setCache(query, newAtomRef.current);
 
     // if new query (new atom, no cache), setAtom (above) and store atom in cache
     // if cached query (existing atom in cache), just update the atom but no need to edit cache
@@ -81,7 +89,7 @@ const useQuery = (query: string): AtomDataArray => {
 
 export const getAtom = (): AtomData => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [atomData] = useAtom(newAtom)
+  const [atomData] = useAtom(atom(initialAtomData))
   return atomData
 }
 

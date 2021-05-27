@@ -40,7 +40,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
       ...this.cacheContainer.cache,
       [query]: atom
     }
-    console.log(this.cacheContainer.cache);
+    console.log('cache', this.cacheContainer.cache);
+    // console.log('read', this.cacheContainer.cache[query].read( (atomdata: any) => console.log(atomdata)))
   }
 
   render() {
