@@ -8,6 +8,8 @@ interface CacheContainer {
   url: string;
   cache: { [key: string]: { [key: string]: any } };
   setCache: (arg1: string, arg2: {}) => void;
+  writeCache: (arg1: string, arg2: any) => void;
+  readQuery: (arg1: string) => any;
 };
 
 
@@ -15,6 +17,10 @@ const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
   setCache: (arg1: string, arg2: { [key: string]: any }) => { },
+  // eslint-disable-next-line no-unused-vars
+  writeCache: (arg1: string, arg2: any) => { },
+  // eslint-disable-next-line no-unused-vars
+  readQuery: (arg1: string) => { },
   cache: {}
 }
 
@@ -30,9 +36,21 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
+      writeCache: this.writeCache,
+      readQuery: this.readQuery,
       cache: {}
     }
     this.cacheContainer = cacheContainer;
+  }
+
+  writeCache = (query: string, data: any) => {
+    this.cacheContainer.cache = {
+      ...this.cacheContainer.cache,
+      [query]: {
+        ...this.cacheContainer.cache.query,
+        data
+      }
+    }
   }
 
   setCache = (query: string, atomData: { [key: string]: any }) => {
@@ -41,6 +59,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
       [query]: atomData
     }
   }
+
+  readQuery = (query: string) => this.cacheContainer.cache[query].data
 
   render() {
     const { children } = this.props;
