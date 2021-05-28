@@ -26,39 +26,25 @@ const initialAtomData: AtomData = {
 };
 
 const newAtom = atom(initialAtomData);
-// const newAsyncAtom = atom(async (get:any, set:any) => set(newAtom, get(newAtom) + 1));
-// const newAsyncAtom = atom(async (get) => get(newAtom));
-// const asyncFetchAtom = atom(
-//   (get) => get(newAtom),
-//   async (_get, set, url) => {
-//     const response = await request(url, query);
-//     set(newAtom, (await response))
-//   }
-// )
 
-type SomethingAtom =
-  | (Atom<AtomData> & {
-      write: Write<SetStateAction<AtomData>>;
-      onMount?: OnMount<SetStateAction<AtomData>> | undefined;
-    } & WithInitialValue<AtomData>)
-  | Atom<AtomData>;
+type ActiveAtom =
+| (Atom<AtomData> & {
+    write: Write<SetStateAction<AtomData>>;
+    onMount?: OnMount<SetStateAction<AtomData>> | undefined;
+  } & WithInitialValue<AtomData>)
+| Atom<AtomData>;
 
 const useQuery = (query: string): AtomDataArray => {
-  let somethingAtom: SomethingAtom = newAtom;
-  const { url, cache, setCache } = useContext(AppContext);
 
+  const { url, cache, setCache } = useContext(AppContext);
   const cacheResponse = cache[query];
-  if (cacheResponse) {
-    console.log('you did it!');
-    somethingAtom = cacheResponse;
-  }
-  const [cachedAtomData] = useAtom(somethingAtom);
 
   const loading = useRef(true);
   const hasError = useRef(false);
   const data = useRef<{ [key: string]: any } | null>(null);
-
-  const [atomData, setAtom] = useAtom(newAtom);
+  
+  const activeAtom: ActiveAtom = cacheResponse || newAtom;
+  const [atomData, setAtom] = useAtom(activeAtom);
   loading.current = atomData.loading;
   hasError.current = atomData.hasError;
   data.current = atomData.data;
@@ -66,9 +52,10 @@ const useQuery = (query: string): AtomDataArray => {
   useEffect(() => {
     (async () => {
       if (cacheResponse) {
-        loading.current = cachedAtomData.loading;
-        hasError.current = cachedAtomData.hasError;
-        data.current = cachedAtomData.data;
+        console.log('you did it!');
+        loading.current = atomData.loading;
+        hasError.current = atomData.hasError;
+        data.current = atomData.data;
       } else {
         try {
           const result = await request(url, query);
