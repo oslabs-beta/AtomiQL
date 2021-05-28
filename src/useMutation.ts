@@ -13,8 +13,9 @@ interface MutationArg {
   [key: string]: any
 }
 
-const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => {
-  const { url } = useContext(AppContext);
+const useMutation = (query: string, callback: any): [(arg1: MutationArg) => void, AtomData] => {
+  const cacheContainer = useContext(AppContext);
+  const { url } = cacheContainer;
   const [response, setResponse] = useState(initialData);
 
   const graphQLClient = new GraphQLClient(url)
@@ -26,11 +27,13 @@ const useMutation = (query: string): [(arg1: MutationArg) => void, AtomData] => 
     });
     try {
       const result = await graphQLClient.request(query, mutationArg);
-      setResponse({
+      const newResponse = {
         data: result,
         loading: false,
         hasError: false,
-      });
+      };
+      setResponse(newResponse);
+      if (callback) callback(cacheContainer, newResponse)
     } catch {
       setResponse({
         data: null,
