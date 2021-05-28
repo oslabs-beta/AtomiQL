@@ -1,15 +1,8 @@
 /* eslint no-console:0 */
-
-import { Atom, atom, useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
 import { useEffect, useContext, useRef } from 'react';
-import {
-  OnMount,
-  SetStateAction,
-  WithInitialValue,
-  Write,
-} from 'jotai/core/types';
-import { AppContext } from './atomiContext';
+import { AtomiAtom, AppContext } from './atomiContext';
 
 export interface AtomData {
   loading: boolean;
@@ -27,23 +20,15 @@ const initialAtomData: AtomData = {
 
 const newAtom = atom(initialAtomData);
 
-type ActiveAtom =
-| (Atom<AtomData> & {
-    write: Write<SetStateAction<AtomData>>;
-    onMount?: OnMount<SetStateAction<AtomData>> | undefined;
-  } & WithInitialValue<AtomData>)
-| Atom<AtomData>;
-
 const useQuery = (query: string): AtomDataArray => {
-
   const { url, cache, setCache } = useContext(AppContext);
   const cacheResponse = cache[query];
 
   const loading = useRef(true);
   const hasError = useRef(false);
   const data = useRef<{ [key: string]: any } | null>(null);
-  
-  const activeAtom: ActiveAtom = cacheResponse || newAtom;
+
+  const activeAtom: AtomiAtom = cacheResponse || newAtom;
   const [atomData, setAtom] = useAtom(activeAtom);
   loading.current = atomData.loading;
   hasError.current = atomData.hasError;
@@ -68,7 +53,6 @@ const useQuery = (query: string): AtomDataArray => {
             hasError: false,
           });
         } catch {
-          console.log('--------- CATCH ---------');
           setAtom({
             data: null,
             loading: false,

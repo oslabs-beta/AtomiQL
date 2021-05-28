@@ -1,4 +1,5 @@
 import { Atom } from 'jotai';
+import { OnMount, SetStateAction, WithInitialValue, Write } from 'jotai/core/types';
 import React, { Suspense } from 'react';
 import { AtomData } from './useQuery';
 
@@ -6,23 +7,25 @@ interface MyProps {
   url: string;
 }
 
+export type AtomiAtom = Atom<AtomData> & {
+  write: Write<SetStateAction<AtomData>>;
+  onMount?: OnMount<SetStateAction<AtomData>> | undefined;
+} & WithInitialValue<AtomData>
+
 interface CacheContainer {
   url: string;
-  cache: { [key: string]: Atom<AtomData> };
-  setCache: (arg1: string, arg2: Atom<AtomData>) => void;
+  cache: { [key: string]: AtomiAtom };
+  setCache: (arg1: string, arg2: AtomiAtom) => void;
 };
 
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: Atom<AtomData> ) => { },
+  setCache: (arg1: string, arg2: AtomiAtom ) => { },
   cache: {}
-
-
 }
 
 export const AppContext = React.createContext(initialCache)
-
 
 export default class AtomiProvider extends React.Component<MyProps> {
   cacheContainer: CacheContainer;
@@ -38,13 +41,11 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  setCache = (query: string, atom: Atom<AtomData>) => {
+  setCache = (query: string, atom: AtomiAtom) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
       [query]: atom
     }
-    console.log('cache in context setCache', this.cacheContainer.cache);
-    // console.log('read', this.cacheContainer.cache[query].read( (atomdata: any) => console.log(atomdata)))
   }
 
   render() {
