@@ -1,4 +1,6 @@
-import React from 'react';
+import { Atom } from 'jotai';
+import React, { Suspense } from 'react';
+import { AtomData } from './useQuery';
 
 interface MyProps {
   url: string;
@@ -6,16 +8,17 @@ interface MyProps {
 
 interface CacheContainer {
   url: string;
-  cache: { [key: string]: { [key: string]: any } };
-  setCache: (arg1: string, arg2: {}) => void;
+  cache: { [key: string]: Atom<AtomData> };
+  setCache: (arg1: string, arg2: Atom<AtomData>) => void;
 };
-
 
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: { [key: string]: any }) => { },
+  setCache: (arg1: string, arg2: Atom<AtomData> ) => { },
   cache: {}
+
+
 }
 
 export const AppContext = React.createContext(initialCache)
@@ -35,18 +38,22 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  setCache = (query: string, atomData: { [key: string]: any }) => {
+  setCache = (query: string, atom: Atom<AtomData>) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
-      [query]: atomData
+      [query]: atom
     }
+    console.log('cache in context setCache', this.cacheContainer.cache);
+    // console.log('read', this.cacheContainer.cache[query].read( (atomdata: any) => console.log(atomdata)))
   }
 
   render() {
     const { children } = this.props;
     return (
       <AppContext.Provider value={this.cacheContainer}>
-        {children}
+        <Suspense fallback='loading...'>
+          {children}
+        </Suspense>
       </AppContext.Provider>
     );
   }
