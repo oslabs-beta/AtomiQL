@@ -21,7 +21,7 @@ interface CacheContainer {
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: AtomiAtom ) => { },
+  setCache: (arg1: string, arg2: AtomiAtom) => { },
   cache: {}
 }
 
