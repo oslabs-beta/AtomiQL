@@ -22,12 +22,12 @@ const newAtom = atom(initialAtomData);
 
 const useQuery = (query: string): AtomDataArray => {
   const { url, cache, setCache } = useContext(AppContext);
-  const cacheResponse = cache[query];
-
+  const cacheResponse = cache[query] ? cache[query].atom : null;
+  // console.log(`cacheResponse`, cacheResponse)
   const loading = useRef(true);
   const hasError = useRef(false);
   const data = useRef<{ [key: string]: any } | null>(null);
-
+  
   const activeAtom: AtomiAtom = cacheResponse || newAtom;
   const [atomData, setAtom] = useAtom(activeAtom);
   loading.current = atomData.loading;
@@ -37,21 +37,26 @@ const useQuery = (query: string): AtomDataArray => {
   useEffect(() => {
     (async () => {
       if (cacheResponse) {
-        console.log('you did it!');
+        // console.log('you did it!');
         loading.current = atomData.loading;
         hasError.current = atomData.hasError;
         data.current = atomData.data;
       } else {
         try {
           const result = await request(url, query);
-          console.log('RESULT IS', result);
-          setCache(query, newAtom);
-
-          setAtom({
+          // console.log('RESULT IS', result);
+          const newAtomData = {
             data: result,
             loading: false,
             hasError: false,
+          }
+          setCache(query, {
+            atom: newAtom,
+            atomData: newAtomData,
+            writeAtom: setAtom
           });
+
+          setAtom(newAtomData);
         } catch {
           setAtom({
             data: null,

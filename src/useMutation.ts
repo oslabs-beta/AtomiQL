@@ -13,7 +13,7 @@ interface MutationArg {
   [key: string]: any
 }
 
-const useMutation = (query: string, callback: any): [(arg1: MutationArg) => void, AtomData] => {
+const useMutation = (query: string, callback?: any): [(arg1: MutationArg) => void, AtomData] => {
   const cacheContainer = useContext(AppContext);
   const { url } = cacheContainer;
   const [response, setResponse] = useState(initialData);
@@ -33,7 +33,9 @@ const useMutation = (query: string, callback: any): [(arg1: MutationArg) => void
         hasError: false,
       };
       setResponse(newResponse);
-      if (callback) callback(cacheContainer, newResponse)
+      if (callback) {
+        callback(cacheContainer, newResponse)
+      }
     } catch {
       setResponse({
         data: null,
