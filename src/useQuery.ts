@@ -37,7 +37,7 @@ const useQuery = (query: string): AtomDataArray => {
       } else {
         try {
           const result = await request(url, query);
-          const newAtomData = {
+          const newAtomData: AtomData = {
             data: result,
             loading: false,
             hasError: false,
