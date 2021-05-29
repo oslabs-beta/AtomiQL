@@ -14,7 +14,7 @@ const initialCache: CacheContainer = {
   cache: {}
 }
 
-export const AppContext = React.createContext(initialCache)
+export const AtomiContext = React.createContext(initialCache)
 
 export default class AtomiProvider extends React.Component<MyProps> {
   cacheContainer: CacheContainer;
@@ -63,9 +63,9 @@ export default class AtomiProvider extends React.Component<MyProps> {
   render() {
     const { children } = this.props;
     return (
-      <AppContext.Provider value={this.cacheContainer}>
+      <AtomiContext.Provider value={this.cacheContainer}>
         {children}
-      </AppContext.Provider>
+      </AtomiContext.Provider>
     );
   }
 }

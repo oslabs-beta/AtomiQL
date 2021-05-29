@@ -3,7 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { gql } from 'graphql-request';
 import useQuery, { GetAtom } from '../useQuery';
-import AtomiProvider, { AppContext } from '../atomiContext';
+import AtomiProvider, { AtomiContext } from '../atomiContext';
 
 describe('AtomiContext', () => {
   afterEach(() => {
@@ -21,7 +21,7 @@ describe('AtomiContext', () => {
 
   test('URL should be available to context API store via the useContext hook', async () => {
     function CheckContext() {
-      const result = useContext(AppContext);
+      const result = useContext(AtomiContext);
       return <div>{result.url}</div>;
     }
     const url = 'https://graphql-pokemon2.vercel.app';
