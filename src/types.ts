@@ -31,7 +31,6 @@ export interface ReadQueryOutput {
 }
 export interface CacheContainer {
   url: string;
-  writeCache: (arg1: string, arg2: any) => void;
   readQuery: (arg1: string) => ReadQueryOutput;
   cache: {
     [key: string]: AtomiAtomContainer;

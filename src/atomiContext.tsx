@@ -8,8 +8,6 @@ interface MyProps {
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  writeCache: (arg1: string, arg2: any) => { },
-  // eslint-disable-next-line no-unused-vars
   readQuery: (arg1: string) => ({ data: {}, writeAtom: () => { } }),
   // eslint-disable-next-line no-unused-vars
   setCache: (arg1: string, arg2: AtomiAtomContainer) => { },
@@ -27,21 +25,10 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
-      writeCache: this.writeCache,
       readQuery: this.readQuery,
       cache: {}
     }
     this.cacheContainer = cacheContainer;
-  }
-
-  writeCache = (query: string, data: any) => {
-    const atomiAtomContainer = this.readQuery(query)
-    const { writeAtom } = atomiAtomContainer;
-    writeAtom((atomData: AtomData) => ({
-      ...atomData,
-      data
-    }));
-    return data;
   }
 
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
