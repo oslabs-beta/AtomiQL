@@ -38,21 +38,25 @@ export default class AtomiProvider extends React.Component<MyProps> {
     }
   }
 
+  writeQuery = (query: string, newData: any) => {
+    const atomiAtomContainer = this.cacheContainer.cache[query];
+    const { atomData, writeAtom } = atomiAtomContainer
+    atomData.data = newData;
+    writeAtom((oldAtomData: AtomData) => ({
+      ...oldAtomData,
+      data: newData,
+    })
+    )
+  }
+
   readQuery = (query: string): ReadQueryOutput => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
     if (!atomiAtomContainer) throw new Error('Query not cached');
-    const { writeAtom, atomData: { data } } = atomiAtomContainer;
-    const writeAtomWrapper = (newData: any) => {
-      atomiAtomContainer.atomData.data = newData;
-      writeAtom((atomData: AtomData) => ({
-        ...atomData,
-        data: newData,
-      })
-      )
-    }
+    const { atomData: { data } } = atomiAtomContainer;
+    const writeAtom = (newData: any) => this.writeQuery(query, newData);
     return {
       data,
-      writeAtom: writeAtomWrapper
+      writeAtom
     }
   }
 
