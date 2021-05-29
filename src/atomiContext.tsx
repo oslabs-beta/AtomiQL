@@ -38,9 +38,19 @@ export default class AtomiProvider extends React.Component<MyProps> {
     }
   }
 
-  writeQuery = (query: string, newData: any) => {
+  getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
-    const { atomData, writeAtom } = atomiAtomContainer
+    if (!atomiAtomContainer) throw new Error('Query not cached');
+    return atomiAtomContainer;
+  }
+
+  writeQuery = (query: string, newData: any) => {
+    const atomiAtomContainer = this.getAtomiAtomContainer(query);
+    this.updateAtom(atomiAtomContainer, newData);
+  }
+
+  updateAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any) => {
+    const { atomData, writeAtom } = atomiAtomContainer;
     atomData.data = newData;
     writeAtom((oldAtomData: AtomData) => ({
       ...oldAtomData,
@@ -50,10 +60,10 @@ export default class AtomiProvider extends React.Component<MyProps> {
   }
 
   readQuery = (query: string): ReadQueryOutput => {
-    const atomiAtomContainer = this.cacheContainer.cache[query];
-    if (!atomiAtomContainer) throw new Error('Query not cached');
-    const { atomData: { data } } = atomiAtomContainer;
-    const writeAtom = (newData: any) => this.writeQuery(query, newData);
+    const atomiAtomContainer = this.getAtomiAtomContainer(query);
+    const { data } = atomiAtomContainer.atomData;
+    const writeAtom = (newData: any) => this.updateAtom(atomiAtomContainer, newData);
+
     return {
       data,
       writeAtom
