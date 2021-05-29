@@ -17,23 +17,13 @@ const newAtom = atom(initialAtomData);
 const useQuery = (query: string): AtomDataArray => {
   const { url, cache, setCache } = useContext(AtomiContext);
   const cachedAtom = cache[query] ? cache[query].atom : null;
-  const loading = useRef(true);
-  const hasError = useRef(false);
-  const data = useRef<ResponseData | null>(null);
   
   const activeAtom: AtomiAtom = cachedAtom || newAtom;
   const [atomData, setAtom] = useAtom(activeAtom);
-  loading.current = atomData.loading;
-  hasError.current = atomData.hasError;
-  data.current = atomData.data;
 
   useEffect(() => {
     (async () => {
-      if (cachedAtom) {
-        loading.current = atomData.loading;
-        hasError.current = atomData.hasError;
-        data.current = atomData.data;
-      } else {
+      if (!cachedAtom) {
         try {
           const result = await request(url, query);
           const newAtomData: AtomData = {
@@ -60,7 +50,7 @@ const useQuery = (query: string): AtomDataArray => {
     /* eslint react-hooks/exhaustive-deps:0 */
   }, []);
 
-  return [data.current, loading.current, hasError.current];
+  return [atomData.data, atomData.loading, atomData.hasError];
 };
 
 export const GetAtom = (): AtomData => {
