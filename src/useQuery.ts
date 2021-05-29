@@ -2,15 +2,10 @@
 import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
 import { useEffect, useContext, useRef } from 'react';
-import { AtomiAtom, AppContext } from './atomiContext';
+import { AppContext } from './atomiContext';
+import { AtomData, AtomiAtom, ResponseData } from './types';
 
-export interface AtomData {
-  loading: boolean;
-  data: null | { [key: string]: any };
-  hasError: boolean;
-}
-
-type AtomDataArray = [null | { [key: string]: any }, boolean, boolean];
+type AtomDataArray = [null | ResponseData, boolean, boolean];
 
 const initialAtomData: AtomData = {
   loading: true,
@@ -22,12 +17,11 @@ const newAtom = atom(initialAtomData);
 
 const useQuery = (query: string): AtomDataArray => {
   const { url, cache, setCache } = useContext(AppContext);
-  const cacheResponse = cache[query];
-
+  const cacheResponse = cache[query] ? cache[query].atom : null;
   const loading = useRef(true);
   const hasError = useRef(false);
-  const data = useRef<{ [key: string]: any } | null>(null);
-
+  const data = useRef<ResponseData | null>(null);
+  
   const activeAtom: AtomiAtom = cacheResponse || newAtom;
   const [atomData, setAtom] = useAtom(activeAtom);
   loading.current = atomData.loading;
@@ -37,21 +31,24 @@ const useQuery = (query: string): AtomDataArray => {
   useEffect(() => {
     (async () => {
       if (cacheResponse) {
-        console.log('you did it!');
         loading.current = atomData.loading;
         hasError.current = atomData.hasError;
         data.current = atomData.data;
       } else {
         try {
           const result = await request(url, query);
-          console.log('RESULT IS', result);
-          setCache(query, newAtom);
-
-          setAtom({
+          const newAtomData: AtomData = {
             data: result,
             loading: false,
             hasError: false,
+          }
+          setCache(query, {
+            atom: newAtom,
+            atomData: newAtomData,
+            writeAtom: setAtom
           });
+
+          setAtom(newAtomData);
         } catch {
           setAtom({
             data: null,

@@ -1,27 +1,16 @@
-import { Atom } from 'jotai';
-import { OnMount, SetStateAction, WithInitialValue, Write } from 'jotai/core/types';
-import React, { Suspense } from 'react';
-import { AtomData } from './useQuery';
+import React from 'react';
+import { AtomData, AtomiAtomContainer, CacheContainer, ReadQueryOutput } from './types';
 
 interface MyProps {
   url: string;
 }
 
-export type AtomiAtom = Atom<AtomData> & {
-  write: Write<SetStateAction<AtomData>>;
-  onMount?: OnMount<SetStateAction<AtomData>> | undefined;
-} & WithInitialValue<AtomData>
-
-interface CacheContainer {
-  url: string;
-  cache: { [key: string]: AtomiAtom };
-  setCache: (arg1: string, arg2: AtomiAtom) => void;
-};
-
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: AtomiAtom) => { },
+  readQuery: (arg1: string) => ({ data: {}, writeAtom: () => { } }),
+  // eslint-disable-next-line no-unused-vars
+  setCache: (arg1: string, arg2: AtomiAtomContainer) => { },
   cache: {}
 }
 
@@ -36,15 +25,34 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
+      readQuery: this.readQuery,
       cache: {}
     }
     this.cacheContainer = cacheContainer;
   }
 
-  setCache = (query: string, atom: AtomiAtom) => {
+  setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
-      [query]: atom
+      [query]: atomiAtomContainer
+    }
+  }
+
+  readQuery = (query: string): ReadQueryOutput => {
+    const atomiAtomContainer = this.cacheContainer.cache[query];
+    if (!atomiAtomContainer) throw new Error('Query not cached');
+    const { writeAtom, atomData: { data } } = atomiAtomContainer;
+    const writeAtomWrapper = (newData: any) => {
+      atomiAtomContainer.atomData.data = newData;
+      writeAtom((atomData: AtomData) => ({
+        ...atomData,
+        data: newData,
+      })
+      )
+    }
+    return {
+      data,
+      writeAtom: writeAtomWrapper
     }
   }
 
@@ -52,9 +60,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const { children } = this.props;
     return (
       <AppContext.Provider value={this.cacheContainer}>
-        <Suspense fallback='loading...'>
-          {children}
-        </Suspense>
+        {children}
       </AppContext.Provider>
     );
   }
