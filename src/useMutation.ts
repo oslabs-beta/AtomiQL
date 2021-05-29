@@ -1,8 +1,8 @@
 import { useState, useContext } from 'react';
 // import { atom, useAtom } from 'jotai';
 import { GraphQLClient } from 'graphql-request';
+import { AtomData, CacheContainer } from './types';
 import { AppContext } from './atomiContext';
-import { AtomData } from './useQuery';
 
 const initialData: AtomData = {
   loading: false,
@@ -10,15 +10,20 @@ const initialData: AtomData = {
   hasError: false,
 };
 interface MutationArg {
-  [key: string]: any
+  [key: string]: any;
 }
 
-const useMutation = (query: string, callback?: any): [(arg1: MutationArg) => void, AtomData] => {
+type MutationCallback = (arg1: CacheContainer, arg2: AtomData) => void;
+
+const useMutation = (
+  query: string,
+  callback?: MutationCallback
+): [(arg1: MutationArg) => void, AtomData] => {
   const cacheContainer = useContext(AppContext);
   const { url } = cacheContainer;
   const [response, setResponse] = useState(initialData);
 
-  const graphQLClient = new GraphQLClient(url)
+  const graphQLClient = new GraphQLClient(url);
 
   const triggerMutation = async (mutationArg: MutationArg) => {
     setResponse({
@@ -27,15 +32,13 @@ const useMutation = (query: string, callback?: any): [(arg1: MutationArg) => voi
     });
     try {
       const result = await graphQLClient.request(query, mutationArg);
-      const newResponse = {
+      const newResponse: AtomData = {
         data: result,
         loading: false,
         hasError: false,
       };
       setResponse(newResponse);
-      if (callback) {
-        callback(cacheContainer, newResponse)
-      }
+      if (callback) callback(cacheContainer, newResponse);
     } catch {
       setResponse({
         data: null,
