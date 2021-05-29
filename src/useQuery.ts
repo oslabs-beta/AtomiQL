@@ -2,15 +2,10 @@
 import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
 import { useEffect, useContext, useRef } from 'react';
-import { AtomiAtom, AppContext } from './atomiContext';
+import { AppContext } from './atomiContext';
+import { AtomData, AtomiAtom, ResponseData } from './types';
 
-export interface AtomData {
-  loading: boolean;
-  data: null | { [key: string]: any };
-  hasError: boolean;
-}
-
-type AtomDataArray = [null | { [key: string]: any }, boolean, boolean];
+type AtomDataArray = [null | ResponseData, boolean, boolean];
 
 const initialAtomData: AtomData = {
   loading: true,
@@ -25,7 +20,7 @@ const useQuery = (query: string): AtomDataArray => {
   const cacheResponse = cache[query] ? cache[query].atom : null;
   const loading = useRef(true);
   const hasError = useRef(false);
-  const data = useRef<{ [key: string]: any } | null>(null);
+  const data = useRef<ResponseData | null>(null);
   
   const activeAtom: AtomiAtom = cacheResponse || newAtom;
   const [atomData, setAtom] = useAtom(activeAtom);
