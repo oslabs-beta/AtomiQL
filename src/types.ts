@@ -19,7 +19,7 @@ export type AtomiAtom = Atom<AtomData> & {
   onMount?: OnMount<SetStateAction<AtomData>> | undefined;
 } & WithInitialValue<AtomData>;
 
-export type AtomiAtomContainer = {
+export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
   writeAtom: (update: SetStateAction<AtomData>) => void | Promise<void>;
