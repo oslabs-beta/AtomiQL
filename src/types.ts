@@ -1,3 +1,4 @@
+import { GraphQLClient } from 'graphql-request';
 import {
   OnMount,
   SetStateAction,
@@ -36,4 +37,5 @@ export interface CacheContainer {
     [key: string]: AtomiAtomContainer;
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
+  graphQLClient: GraphQLClient;
 }
