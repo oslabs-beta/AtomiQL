@@ -1,6 +1,6 @@
 import { atom, useAtom } from 'jotai';
 import { request } from 'graphql-request';
-import { useEffect, useContext, useRef } from 'react';
+import { useEffect, useContext } from 'react';
 import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, ResponseData } from './types';
 
@@ -12,13 +12,11 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const newAtom = atom(initialAtomData);
-
 const useQuery = (query: string): AtomDataArray => {
   const { url, cache, setCache } = useContext(AtomiContext);
   const cachedAtom = cache[query] ? cache[query].atom : null;
-  
-  const activeAtom: AtomiAtom = cachedAtom || newAtom;
+  const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData)
+
   const [atomData, setAtom] = useAtom(activeAtom);
 
   useEffect(() => {
@@ -32,11 +30,10 @@ const useQuery = (query: string): AtomDataArray => {
             hasError: false,
           }
           setCache(query, {
-            atom: newAtom,
+            atom: activeAtom,
             atomData: newAtomData,
             writeAtom: setAtom
           });
-
           setAtom(newAtomData);
         } catch {
           setAtom({
@@ -54,7 +51,7 @@ const useQuery = (query: string): AtomDataArray => {
 };
 
 export const GetAtom = (): AtomData => {
-  const [atomData] = useAtom(newAtom);
+  const [atomData] = useAtom(atom(initialAtomData));
   return atomData;
 };
 
