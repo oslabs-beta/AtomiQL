@@ -1,3 +1,4 @@
+import { GraphQLClient } from 'graphql-request';
 import React from 'react';
 import { AtomData, AtomiAtomContainer, CacheContainer, ReadQueryOutput } from './types';
 
@@ -11,7 +12,8 @@ const initialCache: CacheContainer = {
   readQuery: (arg1: string) => ({ data: {}, writeAtom: () => { } }),
   // eslint-disable-next-line no-unused-vars
   setCache: (arg1: string, arg2: AtomiAtomContainer) => { },
-  cache: {}
+  cache: {},
+  graphQLClient: new GraphQLClient('')
 }
 
 export const AtomiContext = React.createContext(initialCache)
@@ -22,11 +24,13 @@ export default class AtomiProvider extends React.Component<MyProps> {
   constructor(props: MyProps) {
     super(props);
     const { url } = this.props;
+    const graphQLClient = new GraphQLClient(url);
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
       readQuery: this.readQuery,
-      cache: {}
+      cache: {},
+      graphQLClient,
     }
     this.cacheContainer = cacheContainer;
   }
