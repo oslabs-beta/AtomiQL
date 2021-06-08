@@ -22,13 +22,14 @@ const useQuery = (query: string): AtomDataArray => {
   useEffect(() => {
     (async () => {
       if (!cachedAtom) {
+        const newAtomData: AtomData = {
+          data: null,
+          loading: false,
+          hasError: false,
+        }
         try {
           const result = await request(url, query);
-          const newAtomData: AtomData = {
-            data: result,
-            loading: false,
-            hasError: false,
-          }
+          newAtomData.data = result;
           setCache(query, {
             atom: activeAtom,
             atomData: newAtomData,
@@ -36,11 +37,13 @@ const useQuery = (query: string): AtomDataArray => {
           });
           setAtom(newAtomData);
         } catch {
-          setAtom({
-            data: null,
-            loading: false,
-            hasError: true,
+          newAtomData.hasError = true;
+          setCache(query, {
+            atom: activeAtom,
+            atomData: newAtomData,
+            writeAtom: setAtom
           });
+          setAtom(newAtomData);
         }
       }
     })();
