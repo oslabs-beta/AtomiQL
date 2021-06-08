@@ -12,7 +12,8 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const useQuery = (query: string): AtomDataArray => {
+// eslint-disable-next-line no-unused-vars
+const useQuery = (query: string, options?: any): AtomDataArray => {
   const { url, cache, setCache } = useContext(AtomiContext);
   const cachedAtom = cache[query] ? cache[query].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData)
