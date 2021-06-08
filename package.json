@@ -34,8 +34,8 @@
     "typescript-eslint": "^0.0.1-alpha.0"
   },
   "peerDependencies": {
-    "graphql-request": "^3.4.0",
-    "jotai": "^0.16.4",
-    "react": "^17.0.2"
+    "graphql-request": "*",
+    "jotai": "*",
+    "react": "*"
   }
 }
