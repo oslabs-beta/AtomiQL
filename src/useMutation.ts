@@ -1,6 +1,4 @@
 import { useState, useContext } from 'react';
-// import { atom, useAtom } from 'jotai';
-import { GraphQLClient } from 'graphql-request';
 import { AtomData, CacheContainer } from './types';
 import { AtomiContext } from './atomiContext';
 
@@ -20,10 +18,8 @@ const useMutation = (
   callback?: MutationCallback
 ): [(arg1: MutationArg) => void, AtomData] => {
   const cacheContainer = useContext(AtomiContext);
-  const { url } = cacheContainer;
+  const { graphQLClient } = cacheContainer;
   const [response, setResponse] = useState(initialData);
-
-  const graphQLClient = new GraphQLClient(url);
 
   const triggerMutation = async (mutationArg: MutationArg) => {
     setResponse({
