@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "jest -c jest.config.js --watch"
+    "test": "jest -c jest.config.js --watch",
+    "eslint": "eslint"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +21,7 @@
     "@types/jest": "^26.0.23",
     "@types/react": "^17.0.5",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.26.0",
+    "eslint": "^7.28.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-typescript": "^2.4.0",
