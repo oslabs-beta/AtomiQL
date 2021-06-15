@@ -21,7 +21,7 @@ jobs:
           node-version: '14'
           check-latest: true
       - name: Install packages
-        run: npx
+        run: npm i
       - name: Run eslint
-        run: eslint ./src/*
+        run: ./node_modules/.bin/eslint ./src/*
       - run: echo "🍏 This job's status is ${{ job.status }}."
