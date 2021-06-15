@@ -6,7 +6,8 @@ orbs:
   # The Node.js orb contains a set of prepackaged CircleCI configuration you can utilize
   # Orbs reduce the amount of configuration required for common tasks. 
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/node
-  node: circleci/node@4.1
+  node: circleci/node@4.5.0
+  eslint: arrai/eslint@2.0.2
 
 
 jobs:
@@ -29,8 +30,11 @@ jobs:
       # - node/install-packages:
       #     pkg-manager: yarn 
       - run:
-          name: Run tests
-          command: npm test
+          name: eslint testing
+          command: eslint
+      # - run:
+      #     name: Run tests
+      #     command: npm test
 
 workflows:
   # Below is the definition of your workflow.
