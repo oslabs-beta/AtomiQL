@@ -7,7 +7,7 @@ orbs:
   # Orbs reduce the amount of configuration required for common tasks. 
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/node
   node: circleci/node@4.5.0
-  eslint: arrai/eslint@2.0.2
+  #eslint: arrai/eslint@2.0.2
 
 
 jobs:
