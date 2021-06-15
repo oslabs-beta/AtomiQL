@@ -47,7 +47,7 @@ const useQuery = (query: string, input?: any): AtomDataArray => {
         }
       }
     })();
-    /* eslint react-hooks/exhaustive-deps:1 */
+    /* eslint react-hooks/exhaustive-deps:0 */
   }, []);
 
   return [atomData.data, atomData.loading, atomData.hasError];
