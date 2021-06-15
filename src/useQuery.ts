@@ -1,5 +1,4 @@
 import { atom, useAtom } from 'jotai';
-import { request } from 'graphql-request';
 import { useEffect, useContext } from 'react';
 import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, ResponseData } from './types';
@@ -13,8 +12,8 @@ const initialAtomData: AtomData = {
 };
 
 // eslint-disable-next-line no-unused-vars
-const useQuery = (query: string, options?: any): AtomDataArray => {
-  const { url, cache, setCache } = useContext(AtomiContext);
+const useQuery = (query: string, input?: any): AtomDataArray => {
+  const { cache, setCache, graphQLClient } = useContext(AtomiContext);
   const cachedAtom = cache[query] ? cache[query].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData)
 
@@ -29,7 +28,7 @@ const useQuery = (query: string, options?: any): AtomDataArray => {
           hasError: false,
         }
         try {
-          const result = await request(url, query);
+          const result = await graphQLClient.request(query, input);
           newAtomData.data = result;
           setCache(query, {
             atom: activeAtom,
