@@ -23,5 +23,5 @@ jobs:
       - name: Install packages
         run: npm i
       - name: Run eslint
-        run: ./node_modules/.bin/eslint ./src/*
+        run: ./node_modules/.bin/eslint ./src/* --ext .js,.jsx,.ts,.tsx
       - run: echo "🍏 This job's status is ${{ job.status }}."
