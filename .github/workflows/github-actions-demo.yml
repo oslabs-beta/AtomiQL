@@ -15,7 +15,7 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-  Run tsc:
+  Run-tsc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
       - name: Run tsc
         run: tsc
       - run: echo "🍏 This job's status is ${{ job.status }}."
-  Run eslint:
+  Run-eslint:
     runs-on: ubuntu-latest
     steps:
       - name: Run eslint
