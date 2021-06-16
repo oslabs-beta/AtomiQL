@@ -89,10 +89,10 @@ describe('UseQuery', () => {
   });
 
   test('Ensure query is being stored on the cache', async () => {
-    expect(1).toBe(0)
-  })
+    expect(1).toBe(0);
+  });
 
   test('If query is ran more than once, it should be retrieved from cache', async () => {
-    expect(1).toBe(0)
-  })
+    expect(1).toBe(0);
+  });
 });
