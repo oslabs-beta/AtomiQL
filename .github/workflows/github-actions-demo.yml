@@ -14,7 +14,10 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-  
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  Run tsc:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with: 
@@ -26,6 +29,10 @@ jobs:
       #   run: npm run test
       - name: Run tsc
         run: tsc
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  Run eslint:
+    runs-on: ubuntu-latest
+    steps:
       - name: Run eslint
         run: ./node_modules/.bin/eslint ./src/* --ext .js,.jsx,.ts,.tsx
       - run: echo "🍏 This job's status is ${{ job.status }}."
