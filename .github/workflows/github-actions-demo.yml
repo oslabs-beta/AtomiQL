@@ -32,7 +32,14 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
   Run-eslint:
     runs-on: ubuntu-latest
-    steps:
+    steps:    
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: '14'
+          check-latest: true
+      - name: Install packages
+        run: npm i
       - name: Run eslint
         run: ./node_modules/.bin/eslint ./src/* --ext .js,.jsx,.ts,.tsx
       - run: echo "🍏 This job's status is ${{ job.status }}."
