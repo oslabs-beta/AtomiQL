@@ -22,8 +22,8 @@ jobs:
           check-latest: true
       - name: Install packages
         run: npm i
-      - name: Run tests
-        run: npm test
+      # - name: Run tests
+      #   run: npm run test
       - name: Run tsc
         run: tsc
       - name: Run eslint
