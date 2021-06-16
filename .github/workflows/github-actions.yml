@@ -43,3 +43,14 @@ jobs:
       - name: Run eslint
         run: ./node_modules/.bin/eslint ./src/* --ext .js,.jsx,.ts,.tsx
       - run: echo "🍏 This job's status is ${{ job.status }}."
+  Run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: '14'
+          check-latest: true
+      - name: Install packages
+        run: npm i
+      - run: echo "::error ::Tests not functional at this time. to update upon completion of tests"
