@@ -1,9 +1,8 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
-import { DocumentNode, print } from 'graphql';
 import { AtomiContext } from './atomiContext';
-import { AtomData, AtomiAtom, ResponseData } from './types';
-import { getASTFromQuery, removeFieldsWithClientDirective } from './AST';
+import { AtomData, AtomiAtom, Query, ResponseData } from './types';
+import { parseQuery } from './AST';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -14,10 +13,8 @@ const initialAtomData: AtomData = {
 };
 
 // eslint-disable-next-line no-unused-vars
-const useQuery = (query: string | DocumentNode, input?: any): AtomDataArray => {
-  const AST = getASTFromQuery(query);
-  const queryString = print(AST);
-  const { updatedAST } = removeFieldsWithClientDirective(AST);
+const useQuery = (query: Query, input?: any): AtomDataArray => {
+  const { updatedAST, queryString } = parseQuery(query);
   const { cache, setCache, graphQLClient } = useContext(AtomiContext);
   const cachedAtom = cache[queryString] ? cache[queryString].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
