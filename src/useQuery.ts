@@ -1,7 +1,9 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
+import { DocumentNode, print } from 'graphql';
 import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, ResponseData } from './types';
+import { getASTFromQuery, removeFieldsWithClientDirective } from './AST';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -12,9 +14,12 @@ const initialAtomData: AtomData = {
 };
 
 // eslint-disable-next-line no-unused-vars
-const useQuery = (query: string, input?: any): AtomDataArray => {
+const useQuery = (query: string | DocumentNode, input?: any): AtomDataArray => {
+  const AST = getASTFromQuery(query);
+  const queryString = print(AST);
+  const { updatedAST } = removeFieldsWithClientDirective(AST);
   const { cache, setCache, graphQLClient } = useContext(AtomiContext);
-  const cachedAtom = cache[query] ? cache[query].atom : null;
+  const cachedAtom = cache[queryString] ? cache[queryString].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
 
   const [atomData, setAtom] = useAtom(activeAtom);
@@ -28,9 +33,9 @@ const useQuery = (query: string, input?: any): AtomDataArray => {
           hasError: false,
         };
         try {
-          const result = await graphQLClient.request(query, input);
+          const result = await graphQLClient.request(updatedAST, input);
           newAtomData.data = result;
-          setCache(query, {
+          setCache(queryString, {
             atom: activeAtom,
             atomData: newAtomData,
             writeAtom: setAtom,
@@ -38,7 +43,7 @@ const useQuery = (query: string, input?: any): AtomDataArray => {
           setAtom(newAtomData);
         } catch {
           newAtomData.hasError = true;
-          setCache(query, {
+          setCache(queryString, {
             atom: activeAtom,
             atomData: newAtomData,
             writeAtom: setAtom,
