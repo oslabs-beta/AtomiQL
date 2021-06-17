@@ -36,6 +36,7 @@ export const removeFieldsWithClientDirective = (
   const updatedAST = visit(ast, {
     Field(node) {
       const { directives } = node;
+      // If the Field has an @client directive, remove this Field
       if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
         removedNodes.push(node);
         return null;
