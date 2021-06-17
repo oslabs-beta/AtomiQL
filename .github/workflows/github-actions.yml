@@ -29,7 +29,9 @@ jobs:
           node-version: '14'
           check-latest: true
       - name: Install packages
-        run: npm i
+        run: |
+          npm i
+          npm i jotai
       - name: Run tsc
         run: tsc
       - run: echo "🍏 This job's status is ${{ job.status }}."
