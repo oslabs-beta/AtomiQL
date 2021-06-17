@@ -30,6 +30,11 @@ jobs:
           check-latest: true
       - name: Install packages
         run: npm i
+      - name: Install peer dependencies
+        run: |
+          npm install react
+          npm install graphql-request  
+          npm install jotai@0.16.4
       - name: Run tsc
         run: tsc
       - run: echo "🍏 This job's status is ${{ job.status }}."

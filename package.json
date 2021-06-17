@@ -38,5 +38,6 @@
     "graphql-request": "*",
     "jotai": "*",
     "react": "*"
-  }
+  },
+  "dependencies": {}
 }
