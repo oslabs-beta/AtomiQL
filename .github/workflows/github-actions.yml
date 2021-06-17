@@ -35,7 +35,6 @@ jobs:
           npm install react
           npm install graphql-request  
           npm install jotai
-          npm install jotai/core/types
       - name: Run tsc
         run: tsc
       - run: echo "🍏 This job's status is ${{ job.status }}."
