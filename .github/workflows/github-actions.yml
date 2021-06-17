@@ -32,10 +32,10 @@ jobs:
         run: npm i
       - name: Install peer dependencies
         run: |
-          npm i react
-          npm i graphql-request  
-          npm i jotai
-          npm i jotai/core/types
+          npm install react
+          npm install graphql-request  
+          npm install jotai
+          npm install jotai/core/types
       - name: Run tsc
         run: tsc
       - run: echo "🍏 This job's status is ${{ job.status }}."
