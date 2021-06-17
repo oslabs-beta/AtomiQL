@@ -30,8 +30,10 @@ jobs:
           check-latest: true
       - name: Install packages
         run: npm i
-      - name: Install jotai
+      - name: Install peer dependencies
         run: |
+          npm i react
+          npm i graphql-request  
           npm i jotai
           npm i jotai/core/types
       - name: Run tsc
