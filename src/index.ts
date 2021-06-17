@@ -8,6 +8,7 @@ import {
   AtomiAtomContainer,
   ReadQueryOutput,
   CacheContainer,
+  Query,
 } from './types';
 
 export {
@@ -20,4 +21,5 @@ export {
   AtomiAtomContainer,
   ReadQueryOutput,
   CacheContainer,
+  Query,
 };
