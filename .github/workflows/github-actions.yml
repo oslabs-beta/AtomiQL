@@ -1,0 +1,59 @@
+name: AtomiQL Github Actions
+on: [push]
+jobs:
+  Prettier-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          check-latest: true      
+      - name: Install packages
+        run: npm i
+      - name: Format
+        run: npx prettier --write ./src/*
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4.1.2
+        with:
+          commit_message: Apply formatting changes
+          branch: ${{ github.head_ref }}
+  Run-tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: '14'
+          check-latest: true
+      - name: Install packages
+        run: npm i
+      - name: Run tsc
+        run: tsc
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  Run-eslint:
+    runs-on: ubuntu-latest
+    steps:    
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: '14'
+          check-latest: true
+      - name: Install packages
+        run: npm i
+      - name: Run eslint
+        run: ./node_modules/.bin/eslint ./src/* --ext .js,.jsx,.ts,.tsx
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  Run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with: 
+          node-version: '14'
+          check-latest: true
+      - name: Install packages
+        run: npm i
+      - run: echo "::error ::Tests not functional at this time. to update upon completion of tests"

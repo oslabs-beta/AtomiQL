@@ -15,7 +15,7 @@ const initialAtomData: AtomData = {
 const useQuery = (query: string, input?: any): AtomDataArray => {
   const { cache, setCache, graphQLClient } = useContext(AtomiContext);
   const cachedAtom = cache[query] ? cache[query].atom : null;
-  const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData)
+  const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
 
   const [atomData, setAtom] = useAtom(activeAtom);
 
@@ -26,14 +26,14 @@ const useQuery = (query: string, input?: any): AtomDataArray => {
           data: null,
           loading: false,
           hasError: false,
-        }
+        };
         try {
           const result = await graphQLClient.request(query, input);
           newAtomData.data = result;
           setCache(query, {
             atom: activeAtom,
             atomData: newAtomData,
-            writeAtom: setAtom
+            writeAtom: setAtom,
           });
           setAtom(newAtomData);
         } catch {
@@ -41,13 +41,13 @@ const useQuery = (query: string, input?: any): AtomDataArray => {
           setCache(query, {
             atom: activeAtom,
             atomData: newAtomData,
-            writeAtom: setAtom
+            writeAtom: setAtom,
           });
           setAtom(newAtomData);
         }
       }
     })();
-    /* eslint react-hooks/exhaustive-deps:0 */
+    /* eslint react-hooks/exhaustive-deps:1 */
   }, []);
 
   return [atomData.data, atomData.loading, atomData.hasError];

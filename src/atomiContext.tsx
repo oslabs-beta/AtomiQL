@@ -1,6 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
 import React from 'react';
-import { AtomData, AtomiAtomContainer, CacheContainer, ReadQueryOutput } from './types';
+import {
+  AtomData,
+  AtomiAtomContainer,
+  CacheContainer,
+  ReadQueryOutput,
+} from './types';
 
 interface MyProps {
   url: string;
@@ -9,14 +14,14 @@ interface MyProps {
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  readQuery: (arg1: string) => ({ data: {}, writeAtom: () => { } }),
+  readQuery: (arg1: string) => ({ data: {}, writeAtom: () => {} }),
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: AtomiAtomContainer) => { },
+  setCache: (arg1: string, arg2: AtomiAtomContainer) => {},
   cache: {},
-  graphQLClient: new GraphQLClient('')
-}
+  graphQLClient: new GraphQLClient(''),
+};
 
-export const AtomiContext = React.createContext(initialCache)
+export const AtomiContext = React.createContext(initialCache);
 
 export default class AtomiProvider extends React.Component<MyProps> {
   cacheContainer: CacheContainer;
@@ -31,27 +36,27 @@ export default class AtomiProvider extends React.Component<MyProps> {
       readQuery: this.readQuery,
       cache: {},
       graphQLClient,
-    }
+    };
     this.cacheContainer = cacheContainer;
   }
 
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
-      [query]: atomiAtomContainer
-    }
-  }
+      [query]: atomiAtomContainer,
+    };
+  };
 
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
     if (!atomiAtomContainer) throw new Error('Query not cached');
     return atomiAtomContainer;
-  }
+  };
 
   writeQuery = (query: string, newData: any) => {
     const atomiAtomContainer = this.getAtomiAtomContainer(query);
     this.updateAtom(atomiAtomContainer, newData);
-  }
+  };
 
   updateAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any) => {
     const { atomData, writeAtom } = atomiAtomContainer;
@@ -59,20 +64,20 @@ export default class AtomiProvider extends React.Component<MyProps> {
     writeAtom((oldAtomData: AtomData) => ({
       ...oldAtomData,
       data: newData,
-    })
-    )
-  }
+    }));
+  };
 
   readQuery = (query: string): ReadQueryOutput => {
     const atomiAtomContainer = this.getAtomiAtomContainer(query);
     const { data } = atomiAtomContainer.atomData;
-    const writeAtom = (newData: any) => this.updateAtom(atomiAtomContainer, newData);
+    const writeAtom = (newData: any) =>
+      this.updateAtom(atomiAtomContainer, newData);
 
     return {
       data,
-      writeAtom
-    }
-  }
+      writeAtom,
+    };
+  };
 
   render() {
     const { children } = this.props;
