@@ -1,13 +1,26 @@
-import { DocumentNode, parse, visit, FieldNode, DirectiveNode } from 'graphql';
+import {
+  DocumentNode,
+  parse,
+  visit,
+  FieldNode,
+  DirectiveNode,
+  print,
+} from 'graphql';
+import { Query } from './types';
 
-type Directives = readonly DirectiveNode[] | undefined;
+export type Directives = readonly DirectiveNode[] | undefined;
 
-interface UpdatedASTResponse {
+export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
   removedNodes: FieldNode[];
 }
+export interface ParseQueryResponse {
+  updatedAST: DocumentNode;
+  queryString: string;
+  removedNodes: FieldNode[];
+}
 
-export const getASTFromQuery = (query: string | DocumentNode): DocumentNode =>
+export const getASTFromQuery = (query: Query): DocumentNode =>
   typeof query === 'string' ? parse(query) : query;
 
 const nodeHasDirectives = (node: FieldNode): boolean =>
@@ -31,4 +44,11 @@ export const removeFieldsWithClientDirective = (
     },
   });
   return { updatedAST, removedNodes };
+};
+
+export const parseQuery = (query: Query): ParseQueryResponse => {
+  const AST = getASTFromQuery(query);
+  const queryString = print(AST);
+  const { updatedAST, removedNodes } = removeFieldsWithClientDirective(AST);
+  return { updatedAST, queryString, removedNodes };
 };
