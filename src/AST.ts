@@ -38,15 +38,15 @@ export const removeFieldsWithClientDirective = (
   const updatedAST = visit(ast, {
     Field: {
       enter(node) {
-        const name: string = node.name.value
-        const hasChildren = !!node.selectionSet
+        const name: string = node.name.value;
+        const hasChildren = !!node.selectionSet;
         queryLevel[name] = {};
         queryLevel[name].parent = queryLevel;
         queryLevel[name].hasChildren = hasChildren;
-        queryLevel = queryLevel[name]
+        queryLevel = queryLevel[name];
       },
       leave(node) {
-        const name: string = node.name.value
+        const name: string = node.name.value;
         queryLevel = queryLevel.parent;
         const { directives } = node;
         // If the Field has an @client directive, remove this Field
@@ -55,14 +55,16 @@ export const removeFieldsWithClientDirective = (
           foundClientDirective = true;
           return null;
         }
-        if (!queryLevel[name].hasChildren) delete queryLevel[name]
+        if (!queryLevel[name].hasChildren) delete queryLevel[name];
 
         return node;
-      }
-    }
+      },
+    },
   });
-  if (foundClientDirective) cleanUpPathToLocalResolver(pathToLocalResolver);
-  else pathToLocalResolver = false;
+  if (foundClientDirective) {
+    cleanUpPathToLocalResolver(pathToLocalResolver);
+    removeEmptyFields(pathToLocalResolver);
+  } else pathToLocalResolver = false;
 
   return { updatedAST, pathToLocalResolver };
 };
@@ -71,28 +73,34 @@ export const cleanUpPathToLocalResolver = (pathToLocalResolver: any) => {
   for (const [key, value] of Object.entries(pathToLocalResolver)) {
     if (key === 'hasChildren') delete pathToLocalResolver[key];
     else if (key === 'parent') delete pathToLocalResolver[key];
-    else cleanUpPathToLocalResolver(value)
+    else cleanUpPathToLocalResolver(value);
   }
   return pathToLocalResolver;
-}
+};
 
-export const getQueryStructure = (
-  ast: DocumentNode
-): UpdatedASTResponse => {
+export const removeEmptyFields = (pathToLocalResolver: any) => {
+  for (const [key, value] of Object.entries(pathToLocalResolver)) {
+    if (JSON.stringify(value) === '{}') delete pathToLocalResolver[key];
+    else removeEmptyFields(value);
+  }
+  return pathToLocalResolver;
+};
+
+export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
   const queryStructure: any = {};
   let queryLevel = queryStructure;
   visit(ast, {
     Field: {
       enter(node) {
-        const name: string = node.name.value
+        const name: string = node.name.value;
         queryLevel[name] = {};
         queryLevel[name].parent = queryLevel;
-        queryLevel = queryLevel[name]
+        queryLevel = queryLevel[name];
       },
       leave(node) {
         queryLevel = queryLevel.parent;
-      }
-    }
+      },
+    },
   });
   return queryStructure;
 };
@@ -100,6 +108,7 @@ export const getQueryStructure = (
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, pathToLocalResolver } = removeFieldsWithClientDirective(AST);
+  const { updatedAST, pathToLocalResolver } =
+    removeFieldsWithClientDirective(AST);
   return { updatedAST, queryString, pathToLocalResolver };
 };
