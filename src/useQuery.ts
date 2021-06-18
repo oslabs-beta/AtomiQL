@@ -12,8 +12,8 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const mergeClientAndLocalState = (localState: any, clientState: any, pathToLocalResolver: any) => {
-  let currentClientStateLevel = clientState;
+const mergeServerAndLocalState = (localState: any, serverState: any, pathToLocalResolver: any) => {
+  let currentClientStateLevel = serverState;
   const recurseThroughPath = (node: any) => {
     if (!node) return;
     let nextLevel: any;
@@ -32,7 +32,6 @@ const mergeClientAndLocalState = (localState: any, clientState: any, pathToLocal
     recurseThroughPath(nextLevel);
   }
   recurseThroughPath(pathToLocalResolver)
-  return clientState;
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -56,7 +55,7 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
           const result = await graphQLClient.request(updatedAST, input);
           if (pathToLocalResolver) {
             const localState = resolveLocalState(pathToLocalResolver);
-            mergeClientAndLocalState(localState, result, pathToLocalResolver);
+            mergeServerAndLocalState(localState, result, pathToLocalResolver);
           }
           newAtomData.data = result;
           setCache(queryString, {
