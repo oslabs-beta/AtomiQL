@@ -49,11 +49,11 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const { resolvers } = this.cacheContainer;
     let currentResolverLevel = resolvers
 
-    const recurseThroughPath = (node: any) => {
-      if (!node) return;
+    const recurseThroughPath = (resolverPathNode: any) => {
+      if (!resolverPathNode) return;
       let nextLevel: any;
       // eslint-disable-next-line no-restricted-syntax
-      for (const [key, value] of Object.entries(node)) {
+      for (const [key, value] of Object.entries(resolverPathNode)) {
         if (key === 'resolveLocally') return;
         currentResolverLevel = currentResolverLevel[key];
         nextLevel = value;

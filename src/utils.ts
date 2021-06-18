@@ -5,17 +5,17 @@ export const mergeServerAndLocalState = (
   pathToLocalResolver: any
 ) => {
   let currentServerStateLevel = serverState;
-  const recurseThroughPath = (node: any) => {
-    if (!node) return;
+  const recurseThroughPath = (resolverPathNode: any) => {
+    if (!resolverPathNode) return;
     if (Array.isArray(currentServerStateLevel)) {
       currentServerStateLevel.forEach((el: any) => {
-        mergeServerAndLocalState(localState, el, node);
+        mergeServerAndLocalState(localState, el, resolverPathNode);
       });
       return;
     }
     let nextLevel: any;
     // eslint-disable-next-line no-restricted-syntax
-    for (const [key, value] of Object.entries(node)) {
+    for (const [key, value] of Object.entries(resolverPathNode)) {
       if (typeof value === 'object' && !!value) {
         if (value.resolveLocally) {
           // eslint-disable-next-line no-param-reassign
