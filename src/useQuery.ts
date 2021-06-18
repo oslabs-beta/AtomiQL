@@ -3,6 +3,7 @@ import { useEffect, useContext } from 'react';
 import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, Query, ResponseData } from './types';
 import { parseQuery } from './AST';
+import { mergeServerAndLocalState } from './utils';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -12,32 +13,10 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const mergeServerAndLocalState = (localState: any, serverState: any, pathToLocalResolver: any) => {
-  let currentClientStateLevel = serverState;
-  const recurseThroughPath = (node: any) => {
-    if (!node) return;
-    let nextLevel: any;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [key, value] of Object.entries(node)) {
-      if (typeof value === 'object' && !!value) {
-        if (value.resolveLocally) {
-          // eslint-disable-next-line no-param-reassign
-          currentClientStateLevel[key] = localState;
-          return;
-        }
-      }
-      currentClientStateLevel = currentClientStateLevel[key];
-      nextLevel = value;
-    }
-    recurseThroughPath(nextLevel);
-  }
-  recurseThroughPath(pathToLocalResolver)
-}
-
-// eslint-disable-next-line no-unused-vars
 const useQuery = (query: Query, input?: any): AtomDataArray => {
   const { updatedAST, queryString, pathToLocalResolver } = parseQuery(query);
-  const { cache, setCache, graphQLClient, resolveLocalState } = useContext(AtomiContext);
+  const { cache, setCache, graphQLClient, resolveLocalState } =
+    useContext(AtomiContext);
   const cachedAtom = cache[queryString] ? cache[queryString].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
 
