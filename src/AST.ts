@@ -12,13 +12,11 @@ export type Directives = readonly DirectiveNode[] | undefined;
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
-  removedNodes: FieldNode[];
   pathToLocalResolver: any;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
-  removedNodes: FieldNode[];
   pathToLocalResolver: any;
 }
 
@@ -34,8 +32,8 @@ const directiveIsType = (directives: Directives, type: string) =>
 export const removeFieldsWithClientDirective = (
   ast: DocumentNode
 ): UpdatedASTResponse => {
-  const removedNodes: FieldNode[] = [];
-  const pathToLocalResolver: any = {};
+  let foundClientDirective = false;
+  let pathToLocalResolver: any = {};
   let queryLevel = pathToLocalResolver;
   const updatedAST = visit(ast, {
     Field: {
@@ -54,7 +52,7 @@ export const removeFieldsWithClientDirective = (
         // If the Field has an @client directive, remove this Field
         if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
           queryLevel[name].resolveLocally = true;
-          removedNodes.push(node);
+          foundClientDirective = true;
           return null;
         }
         if (!queryLevel[name].hasChildren) delete queryLevel[name]
@@ -63,9 +61,10 @@ export const removeFieldsWithClientDirective = (
       }
     }
   });
-  cleanUpPathToLocalResolver(pathToLocalResolver);
-  console.log(`pathToLocalResolver`, pathToLocalResolver);
-  return { updatedAST, removedNodes, pathToLocalResolver };
+  if (foundClientDirective) cleanUpPathToLocalResolver(pathToLocalResolver);
+  else pathToLocalResolver = false;
+
+  return { updatedAST, pathToLocalResolver };
 };
 
 export const cleanUpPathToLocalResolver = (pathToLocalResolver: any) => {
@@ -101,6 +100,6 @@ export const getQueryStructure = (
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, removedNodes, pathToLocalResolver } = removeFieldsWithClientDirective(AST);
-  return { updatedAST, queryString, removedNodes, pathToLocalResolver };
+  const { updatedAST, pathToLocalResolver } = removeFieldsWithClientDirective(AST);
+  return { updatedAST, queryString, pathToLocalResolver };
 };
