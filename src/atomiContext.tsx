@@ -15,13 +15,13 @@ interface MyProps {
 const initialCache: CacheContainer = {
   url: '',
   // eslint-disable-next-line no-unused-vars
-  readQuery: (arg1: string) => ({ data: {}, writeAtom: () => {} }),
+  readQuery: (arg1: string) => ({ data: {}, writeAtom: () => { } }),
   // eslint-disable-next-line no-unused-vars
-  setCache: (arg1: string, arg2: AtomiAtomContainer) => {},
+  setCache: (arg1: string, arg2: AtomiAtomContainer) => { },
   cache: {},
   graphQLClient: new GraphQLClient(''),
   resolvers: {},
-  resolveLocalState: () => {}
+  resolveLocalState: () => { }
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -62,7 +62,6 @@ export default class AtomiProvider extends React.Component<MyProps> {
     }
 
     recurseThroughPath(pathToLocalResolver)
-
     return currentResolverLevel()
   }
 
