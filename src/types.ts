@@ -1,3 +1,4 @@
+import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import {
   OnMount,
@@ -8,6 +9,8 @@ import {
 } from 'jotai/core/types';
 
 export type ResponseData = { [key: string]: any };
+
+export type Query = string | DocumentNode;
 
 export interface AtomData {
   loading: boolean;
