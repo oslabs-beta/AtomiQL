@@ -9,6 +9,7 @@ import {
 
 interface MyProps {
   url: string;
+  resolvers: any;
 }
 
 const initialCache: CacheContainer = {
@@ -19,6 +20,8 @@ const initialCache: CacheContainer = {
   setCache: (arg1: string, arg2: AtomiAtomContainer) => {},
   cache: {},
   graphQLClient: new GraphQLClient(''),
+  resolvers: {},
+  resolveLocalState: () => {}
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -28,7 +31,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   constructor(props: MyProps) {
     super(props);
-    const { url } = this.props;
+    const { url, resolvers } = this.props;
     const graphQLClient = new GraphQLClient(url);
     const cacheContainer: CacheContainer = {
       url,
@@ -36,8 +39,31 @@ export default class AtomiProvider extends React.Component<MyProps> {
       readQuery: this.readQuery,
       cache: {},
       graphQLClient,
+      resolvers,
+      resolveLocalState: this.resolveLocalState,
     };
     this.cacheContainer = cacheContainer;
+  }
+
+  resolveLocalState = (pathToLocalResolver: any) => {
+    const { resolvers } = this.cacheContainer;
+    let currentResolverLevel = resolvers
+
+    const recurseThroughPath = (node: any) => {
+      if (!node) return;
+      let nextLevel: any;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [key, value] of Object.entries(node)) {
+        if (key === 'resolveLocally') return;
+        currentResolverLevel = currentResolverLevel[key];
+        nextLevel = value;
+      }
+      recurseThroughPath(nextLevel);
+    }
+
+    recurseThroughPath(pathToLocalResolver)
+
+    return currentResolverLevel()
   }
 
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
