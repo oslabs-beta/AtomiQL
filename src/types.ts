@@ -41,4 +41,6 @@ export interface CacheContainer {
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
+  resolvers: any;
+  resolveLocalState: any
 }
