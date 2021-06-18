@@ -33,6 +33,21 @@ export const removeFieldsWithClientDirective = (
   ast: DocumentNode
 ): UpdatedASTResponse => {
   const removedNodes: FieldNode[] = [];
+  const queryStructure: any = {};
+  let queryLevel = queryStructure;
+  visit(ast, {
+    Field: {
+      enter(node) {
+        const name: string = node.name.value
+        queryLevel[name] = {};
+        queryLevel[name].parent = queryLevel;
+        queryLevel = queryLevel[name]
+      },
+      leave(node) {
+        queryLevel = queryLevel.parent;
+      }
+    }
+  });
   const updatedAST = visit(ast, {
     Field(node) {
       const { directives } = node;
