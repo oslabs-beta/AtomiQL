@@ -114,5 +114,10 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
   const queryString = print(AST);
   const { updatedAST, pathToLocalResolver, numberOfClientDirectives } =
     removeFieldsWithClientDirective(AST);
-  return { updatedAST, queryString, pathToLocalResolver, numberOfClientDirectives };
+  return {
+    updatedAST,
+    queryString,
+    pathToLocalResolver,
+    numberOfClientDirectives,
+  };
 };
