@@ -56,7 +56,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
       for (const [key, value] of Object.entries(resolverPathNode)) {
         if (value.resolveLocally) {
           const resolverFunction = currentResolverLevel[key];
-          value.resolveLocally = resolverFunction()
+          value.resolveLocally = resolverFunction();
           return;
         }
         currentResolverLevel = currentResolverLevel[key];
