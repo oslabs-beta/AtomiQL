@@ -5,7 +5,7 @@ export const isObjectNotNull = (value: any) =>
 export const objectKeysIncludes = (value: any, keyName: string) =>
   isObjectNotNull(value) && Object.keys(value).includes(keyName);
 
-export const mergeServerAndLocalState = (
+export const mergeServerAndLocalState3 = (
   serverState: any,
   pathToLocalResolver: any
 ) => {
@@ -14,12 +14,11 @@ export const mergeServerAndLocalState = (
     if (!resolverPathNode) return;
     if (Array.isArray(currentServerStateLevel)) {
       currentServerStateLevel.forEach((el: any) => {
-        mergeServerAndLocalState(el, resolverPathNode);
+        mergeServerAndLocalState3(el, resolverPathNode);
       });
       return;
     }
     let nextLevel: any;
-    // eslint-disable-next-line no-restricted-syntax
     for (const [key, value] of Object.entries(resolverPathNode)) {
       if (objectKeysIncludes(value, 'resolveLocally')) {
         currentServerStateLevel[key] = value.resolveLocally;
@@ -31,4 +30,24 @@ export const mergeServerAndLocalState = (
     recurseThroughPath(nextLevel);
   };
   recurseThroughPath(pathToLocalResolver);
+};
+
+export const mergeServerAndLocalState = (
+  serverState: any,
+  pathToLocalResolver: any,
+) => {
+  if (!pathToLocalResolver) return;
+  if (Array.isArray(serverState)) {
+    serverState.forEach((stateEl: any) => {
+      mergeServerAndLocalState(stateEl, pathToLocalResolver);
+    })
+    return;
+  }
+  for (const [pathKey, pathValue] of Object.entries(pathToLocalResolver)) {
+    if (objectKeysIncludes(pathValue, 'resolveLocally')) {
+      serverState[pathKey] = pathValue.resolveLocally;
+    } else {
+      mergeServerAndLocalState(serverState[pathKey], pathValue)
+    }
+  }
 };

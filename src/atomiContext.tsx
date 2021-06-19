@@ -46,7 +46,6 @@ export default class AtomiProvider extends React.Component<MyProps> {
   }
 
   resolveLocalState = (pathToLocalResolver: any, resolvers: any) => {
-    // eslint-disable-next-line no-restricted-syntax
     for (const [pathKey, pathValue] of Object.entries(pathToLocalResolver)) {
       if (pathValue.resolveLocally) pathValue.resolveLocally = resolvers[pathKey]()
       else this.resolveLocalState(pathValue, resolvers[pathKey])
