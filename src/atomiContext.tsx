@@ -54,9 +54,9 @@ export default class AtomiProvider extends React.Component<MyProps> {
       let nextLevel: any;
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of Object.entries(resolverPathNode)) {
-        if (key === 'resolveLocally') return;
         currentResolverLevel = currentResolverLevel[key];
         nextLevel = value;
+        if (value.resolveLocally) return;
       }
       recurseThroughPath(nextLevel);
     }
