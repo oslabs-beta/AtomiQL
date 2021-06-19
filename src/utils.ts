@@ -1,6 +1,5 @@
 /* eslint-disable import/prefer-default-export */
 export const mergeServerAndLocalState = (
-  localState: any,
   serverState: any,
   pathToLocalResolver: any
 ) => {
@@ -9,7 +8,7 @@ export const mergeServerAndLocalState = (
     if (!resolverPathNode) return;
     if (Array.isArray(currentServerStateLevel)) {
       currentServerStateLevel.forEach((el: any) => {
-        mergeServerAndLocalState(localState, el, resolverPathNode);
+        mergeServerAndLocalState(el, resolverPathNode);
       });
       return;
     }
@@ -17,9 +16,8 @@ export const mergeServerAndLocalState = (
     // eslint-disable-next-line no-restricted-syntax
     for (const [key, value] of Object.entries(resolverPathNode)) {
       if (typeof value === 'object' && !!value) {
-        if (value.resolveLocally) {
-          // eslint-disable-next-line no-param-reassign
-          currentServerStateLevel[key] = localState;
+        if (Object.keys(value).includes('resolveLocally')) {
+          currentServerStateLevel[key] = value.resolveLocally;
           return;
         }
       }
@@ -30,3 +28,11 @@ export const mergeServerAndLocalState = (
   };
   recurseThroughPath(pathToLocalResolver);
 };
+
+// export const resolveLocalStateHelper = (currentResolverLevel, key, value) => {
+//   const nextResolverLevel = currentResolverLevel[key]
+//   const nextLevel = value;
+//   if (value.resolveLocally) {
+//     value.resolveLocally = currentResolverLevel()
+//   }
+// }

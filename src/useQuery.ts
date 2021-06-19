@@ -15,7 +15,7 @@ const initialAtomData: AtomData = {
 
 const useQuery = (query: Query, input?: any): AtomDataArray => {
   const { updatedAST, queryString, pathToLocalResolver, numberOfClientDirectives } = parseQuery(query);
-  const { cache, setCache, graphQLClient, resolveLocalState } =
+  const { cache, setCache, graphQLClient, resolveLocalState, resolvers } =
     useContext(AtomiContext);
   const cachedAtom = cache[queryString] ? cache[queryString].atom : null;
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
@@ -33,8 +33,8 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
         try {
           const result = await graphQLClient.request(updatedAST, input);
           if (numberOfClientDirectives > 0) {
-            const localState = resolveLocalState(pathToLocalResolver);
-            mergeServerAndLocalState(localState, result, pathToLocalResolver);
+            resolveLocalState(pathToLocalResolver, resolvers);
+            mergeServerAndLocalState(result, pathToLocalResolver);
           }
           newAtomData.data = result;
           setCache(queryString, {

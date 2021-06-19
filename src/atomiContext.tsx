@@ -45,8 +45,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  resolveLocalState = (pathToLocalResolver: any) => {
-    const { resolvers } = this.cacheContainer;
+  resolveLocalState = (pathToLocalResolver: any, resolvers: any) => {
     let currentResolverLevel = resolvers
 
     const recurseThroughPath = (resolverPathNode: any) => {
@@ -54,15 +53,18 @@ export default class AtomiProvider extends React.Component<MyProps> {
       let nextLevel: any;
       // eslint-disable-next-line no-restricted-syntax
       for (const [key, value] of Object.entries(resolverPathNode)) {
+        if (value.resolveLocally) {
+          const resolverFunction = currentResolverLevel[key];
+          value.resolveLocally = resolverFunction()
+          return;
+        }
         currentResolverLevel = currentResolverLevel[key];
         nextLevel = value;
-        if (value.resolveLocally) return;
       }
       recurseThroughPath(nextLevel);
     }
 
     recurseThroughPath(pathToLocalResolver)
-    return currentResolverLevel()
   }
 
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
