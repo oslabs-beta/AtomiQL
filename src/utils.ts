@@ -23,10 +23,10 @@ export const mergeServerAndLocalState = (
     for (const [key, value] of Object.entries(resolverPathNode)) {
       if (objectKeysIncludes(value, 'resolveLocally')) {
         currentServerStateLevel[key] = value.resolveLocally;
-        return;
+      } else {
+        currentServerStateLevel = currentServerStateLevel[key];
+        nextLevel = value;
       }
-      currentServerStateLevel = currentServerStateLevel[key];
-      nextLevel = value;
     }
     recurseThroughPath(nextLevel);
   };
