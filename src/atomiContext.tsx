@@ -45,8 +45,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  resolveLocalState = (pathToLocalResolver: any) => {
-    const { resolvers } = this.cacheContainer;
+  resolveLocalState = (pathToLocalResolver: any, resolvers: any) => {
     let currentResolverLevel = resolvers;
 
     const recurseThroughPath = (resolverPathNode: any) => {
@@ -66,7 +65,6 @@ export default class AtomiProvider extends React.Component<MyProps> {
     };
 
     recurseThroughPath(pathToLocalResolver);
-    return currentResolverLevel();
   };
 
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
