@@ -1,11 +1,9 @@
 /* eslint-disable import/prefer-default-export */
-export const isObjectNotNull = (value: any) => typeof value === 'object' && !!value;
-export const objectKeysIncludes = (value: any, keyName: string) => {
-  if (isObjectNotNull(value)) {
-    if (Object.keys(value).includes(keyName)) return true
-  }
-  return false;
-}
+export const isObjectNotNull = (value: any) =>
+  typeof value === 'object' && !!value;
+
+export const objectKeysIncludes = (value: any, keyName: string) =>
+  isObjectNotNull(value) && Object.keys(value).includes(keyName);
 
 export const mergeServerAndLocalState = (
   serverState: any,
