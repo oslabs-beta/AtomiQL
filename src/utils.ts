@@ -7,16 +7,16 @@ export const objectKeysIncludes = (value: any, keyName: string) =>
 
 export const mergeServerAndLocalState = (
   serverState: any,
-  pathToLocalResolver: any
+  pathToResolver: any
 ) => {
-  if (!pathToLocalResolver) return;
+  if (!pathToResolver) return;
   if (Array.isArray(serverState)) {
     serverState.forEach((stateEl: any) =>
-      mergeServerAndLocalState(stateEl, pathToLocalResolver)
+      mergeServerAndLocalState(stateEl, pathToResolver)
     );
     return;
   }
-  for (const [pathKey, pathValue] of Object.entries(pathToLocalResolver)) {
+  for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
     if (objectKeysIncludes(pathValue, 'resolveLocally'))
       serverState[pathKey] = pathValue.resolveLocally;
     else mergeServerAndLocalState(serverState[pathKey], pathValue);

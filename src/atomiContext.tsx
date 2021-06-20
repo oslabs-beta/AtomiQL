@@ -45,8 +45,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  resolveLocalState = (pathToLocalResolver: any, resolvers: any) => {
-    for (const [pathKey, pathValue] of Object.entries(pathToLocalResolver)) {
+  resolveLocalState = (pathToResolver: any, resolvers: any) => {
+    for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
       if (pathValue.resolveLocally)
         pathValue.resolveLocally = resolvers[pathKey]();
       else this.resolveLocalState(pathValue, resolvers[pathKey]);

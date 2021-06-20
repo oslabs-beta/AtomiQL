@@ -12,12 +12,12 @@ export type Directives = readonly DirectiveNode[] | undefined;
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
-  pathToLocalResolver: any;
+  pathToResolver: any;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
-  pathToLocalResolver: any;
+  pathToResolver: any;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -29,85 +29,85 @@ const nodeHasDirectives = (node: FieldNode): boolean =>
 const directiveIsType = (directives: Directives, type: string) =>
   !!directives && directives[0].name.value === type;
 
-const updatePathToLocalResolverOnFieldEnter = (
-  pathToLocalResolver: any,
+const updatepathToResolverOnFieldEnter = (
+  pathToResolver: any,
   node: FieldNode
 ) => {
   const name: string = node.name.value;
   const hasChildren = !!node.selectionSet;
-  // Add a key of the Field name to pathToLocalResolver
-  pathToLocalResolver[name] = {};
-  pathToLocalResolver[name].parent = pathToLocalResolver;
-  pathToLocalResolver[name].hasChildren = hasChildren;
-  return pathToLocalResolver[name];
+  // Add a key of the Field name to pathToResolver
+  pathToResolver[name] = {};
+  pathToResolver[name].parent = pathToResolver;
+  pathToResolver[name].hasChildren = hasChildren;
+  return pathToResolver[name];
 };
 
 export const removeFieldsWithClientDirective = (
   ast: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
-  let pathToLocalResolver: any = {};
+  let pathToResolver: any = {};
   const updatedAST = visit(ast, {
     Field: {
       enter(node: FieldNode) {
-        // Track in pathToLocalResolver each Field in the query
-        pathToLocalResolver = updatePathToLocalResolverOnFieldEnter(
-          pathToLocalResolver,
+        // Track in pathToResolver each Field in the query
+        pathToResolver = updatepathToResolverOnFieldEnter(
+          pathToResolver,
           node
         );
       },
       leave(node: FieldNode) {
-        pathToLocalResolver = pathToLocalResolver.parent;
+        pathToResolver = pathToResolver.parent;
         const name: string = node.name.value;
         const { directives } = node;
         // If the Field has an @client directive, remove this Field
         if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
-          pathToLocalResolver[name].resolveLocally = true;
+          pathToResolver[name].resolveLocally = true;
           foundClientDirective = true;
           return null;
         }
-        if (!pathToLocalResolver[name].hasChildren)
-          delete pathToLocalResolver[name];
+        if (!pathToResolver[name].hasChildren)
+          delete pathToResolver[name];
 
         return node;
       },
     },
   });
-  if (foundClientDirective) cleanUpPathToLocalResolver(pathToLocalResolver);
-  else pathToLocalResolver = false;
+  if (foundClientDirective) cleanUppathToResolver(pathToResolver);
+  else pathToResolver = false;
 
-  return { updatedAST, pathToLocalResolver };
+  return { updatedAST, pathToResolver };
 };
 
-export const cleanUpPathToLocalResolver = (pathToLocalResolver: any) => {
-  for (const [key, value] of Object.entries(pathToLocalResolver)) {
-    if (key === 'hasChildren') delete pathToLocalResolver[key];
-    else if (key === 'parent') delete pathToLocalResolver[key];
-    else cleanUpPathToLocalResolver(value);
+export const cleanUppathToResolver = (pathToResolver: any) => {
+  for (const [key, value] of Object.entries(pathToResolver)) {
+    if (key === 'hasChildren') delete pathToResolver[key];
+    else if (key === 'parent') delete pathToResolver[key];
+    else cleanUppathToResolver(value);
   }
-  removeEmptyFields(pathToLocalResolver);
+  removeEmptyFields(pathToResolver);
 };
 
-export const removeEmptyFields = (pathToLocalResolver: any) => {
-  for (const [key, value] of Object.entries(pathToLocalResolver)) {
-    if (JSON.stringify(value) === '{}') delete pathToLocalResolver[key];
+export const removeEmptyFields = (pathToResolver: any) => {
+  for (const [key, value] of Object.entries(pathToResolver)) {
+    if (JSON.stringify(value) === '{}') delete pathToResolver[key];
     else removeEmptyFields(value);
   }
 };
 
 export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
   const queryStructure: any = {};
-  let pathToLocalResolver = queryStructure;
+  let pathToResolver = queryStructure;
   visit(ast, {
     Field: {
       enter(node) {
         const name: string = node.name.value;
-        pathToLocalResolver[name] = {};
-        pathToLocalResolver[name].parent = pathToLocalResolver;
-        pathToLocalResolver = pathToLocalResolver[name];
+        pathToResolver[name] = {};
+        pathToResolver[name].parent = pathToResolver;
+        pathToResolver = pathToResolver[name];
       },
       leave(node) {
-        pathToLocalResolver = pathToLocalResolver.parent;
+        pathToResolver = pathToResolver.parent;
       },
     },
   });
@@ -117,11 +117,11 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, pathToLocalResolver } =
+  const { updatedAST, pathToResolver } =
     removeFieldsWithClientDirective(AST);
   return {
     updatedAST,
     queryString,
-    pathToLocalResolver,
+    pathToResolver,
   };
 };
