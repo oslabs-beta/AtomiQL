@@ -52,7 +52,10 @@ export interface CacheContainer {
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
   resolvers: Resolvers;
-  resolvePathToResolvers: (pathToResolver: PathObject, resolvers: Resolvers) => void;
+  resolvePathToResolvers: (
+    pathToResolver: PathObject,
+    resolvers: Resolvers
+  ) => void;
 }
 
 export interface ServerState {

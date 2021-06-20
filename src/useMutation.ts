@@ -18,7 +18,7 @@ const useMutation = (
   query: Query,
   callback?: MutationCallback
 ): [(arg1: MutationArg) => void, AtomData] => {
-  const { queryString } = parseQuery(query)
+  const { queryString } = parseQuery(query);
   const cacheContainer = useContext(AtomiContext);
   const { graphQLClient } = cacheContainer;
   const [response, setResponse] = useState(initialData);
