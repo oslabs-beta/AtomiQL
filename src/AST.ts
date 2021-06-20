@@ -29,7 +29,7 @@ const nodeHasDirectives = (node: FieldNode): boolean =>
 const directiveIsType = (directives: Directives, type: string) =>
   !!directives && directives[0].name.value === type;
 
-const updatepathToResolverOnFieldEnter = (
+const updatePathToResolverOnFieldEnter = (
   pathToResolver: any,
   node: FieldNode
 ) => {
@@ -51,10 +51,7 @@ export const removeFieldsWithClientDirective = (
     Field: {
       enter(node: FieldNode) {
         // Track in pathToResolver each Field in the query
-        pathToResolver = updatepathToResolverOnFieldEnter(
-          pathToResolver,
-          node
-        );
+        pathToResolver = updatePathToResolverOnFieldEnter(pathToResolver, node);
       },
       leave(node: FieldNode) {
         pathToResolver = pathToResolver.parent;
@@ -66,24 +63,23 @@ export const removeFieldsWithClientDirective = (
           foundClientDirective = true;
           return null;
         }
-        if (!pathToResolver[name].hasChildren)
-          delete pathToResolver[name];
+        if (!pathToResolver[name].hasChildren) delete pathToResolver[name];
 
         return node;
       },
     },
   });
-  if (foundClientDirective) cleanUppathToResolver(pathToResolver);
+  if (foundClientDirective) cleanUpPathToResolver(pathToResolver);
   else pathToResolver = false;
 
   return { updatedAST, pathToResolver };
 };
 
-export const cleanUppathToResolver = (pathToResolver: any) => {
+export const cleanUpPathToResolver = (pathToResolver: any) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
     if (key === 'hasChildren') delete pathToResolver[key];
     else if (key === 'parent') delete pathToResolver[key];
-    else cleanUppathToResolver(value);
+    else cleanUpPathToResolver(value);
   }
   removeEmptyFields(pathToResolver);
 };
@@ -117,8 +113,7 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, pathToResolver } =
-    removeFieldsWithClientDirective(AST);
+  const { updatedAST, pathToResolver } = removeFieldsWithClientDirective(AST);
   return {
     updatedAST,
     queryString,
