@@ -52,11 +52,11 @@ const updatePathToResolverOnLeave = (pathToResolver: any, node: FieldNode) => {
 };
 
 export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
-  ast: DocumentNode
+  AST: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
   let pathToResolver: any = {};
-  const updatedAST = visit(ast, {
+  const updatedAST = visit(AST, {
     Field: {
       enter(node: FieldNode) {
         // Track in pathToResolver each Field in the query and move  it one level deeper
@@ -104,10 +104,11 @@ export const removeEmptyFields = (pathToResolver: any) => {
   }
 };
 
-export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
+// Use this function to get a simple definition of the structure of a graphQL query
+export const getQueryStructure = (AST: DocumentNode): UpdatedASTResponse => {
   const queryStructure: any = {};
   let pathToResolver = queryStructure;
-  visit(ast, {
+  visit(AST, {
     Field: {
       enter(node) {
         const name: string = node.name.value;
