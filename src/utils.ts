@@ -1,32 +1,34 @@
-/* eslint-disable import/prefer-default-export */
+import { PathObject, ServerState } from './types';
+
+export const isObjectAndNotNull = (value: any) =>
+  typeof value === 'object' && !!value;
+
+export const objectKeysIncludes = (value: any, keyName: string) =>
+  isObjectAndNotNull(value) && Object.keys(value).includes(keyName);
+
+const resolveLocally = (pathValue: PathObject) =>
+  objectKeysIncludes(pathValue, 'resolveLocally');
+
 export const mergeServerAndLocalState = (
-  localState: any,
-  serverState: any,
-  pathToLocalResolver: any
+  serverState: ServerState,
+  pathToResolver: PathObject
 ) => {
-  let currentServerStateLevel = serverState;
-  const recurseThroughPath = (resolverPathNode: any) => {
-    if (!resolverPathNode) return;
-    if (Array.isArray(currentServerStateLevel)) {
-      currentServerStateLevel.forEach((el: any) => {
-        mergeServerAndLocalState(localState, el, resolverPathNode);
-      });
-      return;
-    }
-    let nextLevel: any;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [key, value] of Object.entries(resolverPathNode)) {
-      if (typeof value === 'object' && !!value) {
-        if (value.resolveLocally) {
-          // eslint-disable-next-line no-param-reassign
-          currentServerStateLevel[key] = localState;
-          return;
-        }
-      }
-      currentServerStateLevel = currentServerStateLevel[key];
-      nextLevel = value;
-    }
-    recurseThroughPath(nextLevel);
-  };
-  recurseThroughPath(pathToLocalResolver);
+  // If pathToResolver is falsy hit the base case
+  if (!pathToResolver) return;
+  // If serverState is an array, recursively call each element and return out
+  if (Array.isArray(serverState)) {
+    serverState.forEach((stateEl: ServerState) =>
+      mergeServerAndLocalState(stateEl, pathToResolver)
+    );
+    return;
+  }
+
+  // Otherwise iterate through each key value pair in the  pathToResolver object
+  for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
+    // If pathToResolver says resolver locally, update the serverState with the local state
+    if (resolveLocally(pathValue))
+      serverState[pathKey] = pathValue.resolveLocally;
+    // Otherwise recursively call at the next level of depth in the server and path objects
+    else mergeServerAndLocalState(serverState[pathKey], pathValue);
+  }
 };

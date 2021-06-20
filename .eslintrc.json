@@ -19,6 +19,8 @@
   "rules": {
     "react/jsx-filename-extension": [2, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "import/no-unresolved": 0,
-    "import/extensions": 0
+    "import/extensions": 0,
+    "no-restricted-syntax": 0,
+    "no-param-reassign": 0
   }
 }

@@ -6,18 +6,20 @@ import {
   DirectiveNode,
   print,
 } from 'graphql';
-import { Query } from './types';
+import { PathObject, Query } from './types';
 
 export type Directives = readonly DirectiveNode[] | undefined;
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
-  pathToLocalResolver: any;
+  pathToResolver: PathObject;
+  foundClientDirective: boolean;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
-  pathToLocalResolver: any;
+  pathToResolver: PathObject;
+  foundClientDirective: boolean;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -29,76 +31,99 @@ const nodeHasDirectives = (node: FieldNode): boolean =>
 const directiveIsType = (directives: Directives, type: string) =>
   !!directives && directives[0].name.value === type;
 
-export const removeFieldsWithClientDirective = (
-  ast: DocumentNode
+const nodeHasClientDirective = (node: FieldNode) =>
+  nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
+
+const updatePathToResolverOnEnter = (
+  pathToResolver: PathObject,
+  node: FieldNode
+) => {
+  const name: string = node.name.value;
+  // Add a key of each Field name to pathToResolver
+  pathToResolver[name] = {};
+  // Add a link from each child Field its parent
+  pathToResolver[name].parent = pathToResolver;
+  // Return the pathToResolver at the next level of depth
+  return pathToResolver[name];
+};
+
+const updatePathToResolverOnLeave = (
+  pathToResolver: PathObject,
+  node: FieldNode
+) => {
+  // Move pathResolver one level up towards its root
+  pathToResolver = pathToResolver.parent;
+  const name: string = node.name.value;
+  // If this Field has an @client directive tell it to resolveLocally
+  if (nodeHasClientDirective(node)) pathToResolver[name].resolveLocally = true;
+  return pathToResolver;
+};
+
+export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
+  AST: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
-  let pathToLocalResolver: any = {};
-  let queryLevel = pathToLocalResolver;
-  const updatedAST = visit(ast, {
+  let pathToResolver: PathObject = {};
+  const updatedAST = visit(AST, {
     Field: {
-      enter(node) {
-        const name: string = node.name.value;
-        const hasChildren = !!node.selectionSet;
-        queryLevel[name] = {};
-        queryLevel[name].parent = queryLevel;
-        queryLevel[name].hasChildren = hasChildren;
-        queryLevel = queryLevel[name];
+      enter(node: FieldNode) {
+        // Track in pathToResolver each Field in the query and move  it one level deeper
+        pathToResolver = updatePathToResolverOnEnter(pathToResolver, node);
       },
-      leave(node) {
-        const name: string = node.name.value;
-        queryLevel = queryLevel.parent;
-        const { directives } = node;
-        // If the Field has an @client directive, remove this Field
-        if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
-          queryLevel[name].resolveLocally = true;
+      leave(node: FieldNode) {
+        // Update and move pathResolver back up one level towards its root
+        pathToResolver = updatePathToResolverOnLeave(pathToResolver, node);
+
+        // If this Field has an @client directive remove it from the AST
+        if (nodeHasClientDirective(node)) {
           foundClientDirective = true;
+          // Returning null removes this field from the AST
           return null;
         }
-        if (!queryLevel[name].hasChildren) delete queryLevel[name];
-
-        return node;
       },
     },
   });
-  if (foundClientDirective) {
-    cleanUpPathToLocalResolver(pathToLocalResolver);
-    removeEmptyFields(pathToLocalResolver);
-  } else pathToLocalResolver = false;
 
-  return { updatedAST, pathToLocalResolver };
+  // If @client directive found remove the links from each node to its parent in pathToResolver
+  if (foundClientDirective) removeParentFieldsFromTree(pathToResolver);
+
+  return { updatedAST, pathToResolver, foundClientDirective };
 };
 
-export const cleanUpPathToLocalResolver = (pathToLocalResolver: any) => {
-  for (const [key, value] of Object.entries(pathToLocalResolver)) {
-    if (key === 'hasChildren') delete pathToLocalResolver[key];
-    else if (key === 'parent') delete pathToLocalResolver[key];
-    else cleanUpPathToLocalResolver(value);
+// removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
+export const removeParentFieldsFromTree = (pathToResolver: PathObject) => {
+  for (const [key, value] of Object.entries(pathToResolver)) {
+    if (key === 'parent') delete pathToResolver[key];
+    else removeParentFieldsFromTree(value);
   }
-  return pathToLocalResolver;
+  // This is an optimization that removes any empty fields from the tree. In this case
+  // that is each Field on the Query that does not have an @client directive. This
+  // improves efficiency as further tree traversals don't have to check these nodes.
+  removeEmptyFields(pathToResolver);
 };
 
-export const removeEmptyFields = (pathToLocalResolver: any) => {
-  for (const [key, value] of Object.entries(pathToLocalResolver)) {
-    if (JSON.stringify(value) === '{}') delete pathToLocalResolver[key];
+// Remove every value of {} in a tree
+export const removeEmptyFields = (pathToResolver: PathObject) => {
+  for (const [key, value] of Object.entries(pathToResolver)) {
+    if (JSON.stringify(value) === '{}') delete pathToResolver[key];
     else removeEmptyFields(value);
   }
-  return pathToLocalResolver;
 };
 
-export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
-  const queryStructure: any = {};
-  let queryLevel = queryStructure;
-  visit(ast, {
+// Use this function to get a simple definition of the structure of a graphQL query
+export const getQueryStructure = (AST: DocumentNode): PathObject => {
+  const queryStructure: PathObject = {};
+  let pathToResolver = queryStructure;
+  visit(AST, {
     Field: {
       enter(node) {
         const name: string = node.name.value;
-        queryLevel[name] = {};
-        queryLevel[name].parent = queryLevel;
-        queryLevel = queryLevel[name];
+        pathToResolver[name] = {};
+        pathToResolver[name].parent = pathToResolver;
+        pathToResolver = pathToResolver[name];
       },
-      leave(node) {
-        queryLevel = queryLevel.parent;
+      leave() {
+        pathToResolver = pathToResolver.parent;
       },
     },
   });
@@ -106,9 +131,16 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 };
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
+  // Get the AST from the Query
   const AST = getASTFromQuery(query);
-  const queryString = print(AST);
-  const { updatedAST, pathToLocalResolver } =
-    removeFieldsWithClientDirective(AST);
-  return { updatedAST, queryString, pathToLocalResolver };
+  // The updated AST has had all fields with @client directives removed
+  // pathToResolver is an object that describes the path to the resolvers for any @client directives
+  const { updatedAST, pathToResolver, foundClientDirective } =
+    removeFieldsWithClientDirectiveAndCreatePathToResolver(AST);
+  return {
+    updatedAST,
+    pathToResolver,
+    queryString: print(AST),
+    foundClientDirective,
+  };
 };
