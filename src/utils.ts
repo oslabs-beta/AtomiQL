@@ -1,13 +1,23 @@
-/* eslint-disable import/prefer-default-export */
-export const isObjectNotNull = (value: any) =>
+export interface PathObject {
+  resolveLocally?: any;
+  [key: string]: PathObject;
+}
+export interface ServerState {
+  [key: string]: ServerState;
+}
+
+export const isObjectAndNotNull = (value: any) =>
   typeof value === 'object' && !!value;
 
 export const objectKeysIncludes = (value: any, keyName: string) =>
-  isObjectNotNull(value) && Object.keys(value).includes(keyName);
+  isObjectAndNotNull(value) && Object.keys(value).includes(keyName);
+
+const resolveLocally = (pathValue: PathObject) =>
+  objectKeysIncludes(pathValue, 'resolveLocally');
 
 export const mergeServerAndLocalState = (
-  serverState: any,
-  pathToResolver: any
+  serverState: ServerState,
+  pathToResolver: PathObject
 ) => {
   if (!pathToResolver) return;
   if (Array.isArray(serverState)) {
@@ -16,8 +26,9 @@ export const mergeServerAndLocalState = (
     );
     return;
   }
+
   for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
-    if (objectKeysIncludes(pathValue, 'resolveLocally'))
+    if (resolveLocally(pathValue))
       serverState[pathKey] = pathValue.resolveLocally;
     else mergeServerAndLocalState(serverState[pathKey], pathValue);
   }
