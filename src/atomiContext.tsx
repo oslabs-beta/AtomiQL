@@ -49,12 +49,16 @@ export default class AtomiProvider extends React.Component<MyProps> {
   }
 
   // Update the path to resolvers object with the resolved local state
-  resolvePathToResolvers = (pathToResolver: PathObject, resolvers: Resolvers) => {
+  resolvePathToResolvers = (
+    pathToResolver: PathObject,
+    resolvers: Resolvers
+  ) => {
     for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
       const nextResolverNode = resolvers[pathKey];
       if (pathValue.resolveLocally && typeof nextResolverNode === 'function')
-        pathValue.resolveLocally = nextResolverNode()
-      else if (typeof nextResolverNode === 'object') this.resolvePathToResolvers(pathValue, nextResolverNode);
+        pathValue.resolveLocally = nextResolverNode();
+      else if (typeof nextResolverNode === 'object')
+        this.resolvePathToResolvers(pathValue, nextResolverNode);
     }
   };
 
@@ -95,7 +99,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Read the data and get the writeAtom function associated with a certain
   readQuery = (query: string): ReadQueryOutput => {
-    const { queryString } = parseQuery(query)
+    const { queryString } = parseQuery(query);
     const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
     const { data } = atomiAtomContainer.atomData;
     const writeAtom = (newData: any) =>
