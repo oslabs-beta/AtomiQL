@@ -51,10 +51,7 @@ export const removeFieldsWithClientDirective = (
     Field: {
       enter(node: FieldNode) {
         // Track in pathToResolver each Field in the query
-        pathToResolver = updatepathToResolverOnFieldEnter(
-          pathToResolver,
-          node
-        );
+        pathToResolver = updatepathToResolverOnFieldEnter(pathToResolver, node);
       },
       leave(node: FieldNode) {
         pathToResolver = pathToResolver.parent;
@@ -66,8 +63,7 @@ export const removeFieldsWithClientDirective = (
           foundClientDirective = true;
           return null;
         }
-        if (!pathToResolver[name].hasChildren)
-          delete pathToResolver[name];
+        if (!pathToResolver[name].hasChildren) delete pathToResolver[name];
 
         return node;
       },
@@ -117,8 +113,7 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, pathToResolver } =
-    removeFieldsWithClientDirective(AST);
+  const { updatedAST, pathToResolver } = removeFieldsWithClientDirective(AST);
   return {
     updatedAST,
     queryString,
