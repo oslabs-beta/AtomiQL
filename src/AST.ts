@@ -13,11 +13,13 @@ export type Directives = readonly DirectiveNode[] | undefined;
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
   pathToResolver: any;
+  foundClientDirective: boolean;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
   pathToResolver: any;
+  foundClientDirective: boolean;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -78,10 +80,8 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
 
   // If @client directive found remove the links from each node to its parent in pathToResolver
   if (foundClientDirective) removeParentFieldsFromTree(pathToResolver);
-  // Otherwise set pathToResolver to false so we know no @client directives were found
-  else pathToResolver = false;
 
-  return { updatedAST, pathToResolver };
+  return { updatedAST, pathToResolver, foundClientDirective };
 };
 
 // removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
@@ -127,14 +127,14 @@ export const getQueryStructure = (AST: DocumentNode): UpdatedASTResponse => {
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
   const AST = getASTFromQuery(query);
-  // The updated AST has removed all fields with @client directives
-  // The path to resolver is false if there are no @client directives
-  // Otherwise it is an object that describes the path to the resolvers for any @client directives
-  const { updatedAST, pathToResolver } =
+  // The updated AST has had all fields with @client directives removed
+  // pathToResolver is an object that describes the path to the resolvers for any @client directives
+  const { updatedAST, pathToResolver, foundClientDirective } =
     removeFieldsWithClientDirectiveAndCreatePathToResolver(AST);
   return {
     updatedAST,
     pathToResolver,
     queryString: print(AST),
+    foundClientDirective,
   };
 };
