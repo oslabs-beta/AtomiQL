@@ -29,6 +29,9 @@ const nodeHasDirectives = (node: FieldNode): boolean =>
 const directiveIsType = (directives: Directives, type: string) =>
   !!directives && directives[0].name.value === type;
 
+const nodeHasClientDirective = (node: FieldNode) =>
+  nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
+
 const updatePathToResolverOnFieldEnter = (
   pathToResolver: any,
   node: FieldNode
@@ -59,7 +62,7 @@ export const removeFieldsWithClientDirective = (
         const name: string = node.name.value;
         const { directives } = node;
         // Check if this field has an @client directive
-        if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
+        if (nodeHasClientDirective(node)) {
           foundClientDirective = true;
           // Let pathToResolver know to resolve this Filed locally
           pathToResolver[name].resolveLocally = true;
