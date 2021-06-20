@@ -11,21 +11,21 @@ const resolveLocally = (pathValue: PathObject) =>
 
 export const mergeServerAndLocalState = (
   serverState: ServerState,
-  pathToResolver: PathObject
+  pathToResolvers: PathObject
 ) => {
-  // If pathToResolver is falsy hit the base case
-  if (!pathToResolver) return;
+  // If pathToResolvers is falsy hit the base case
+  if (!pathToResolvers) return;
   // If serverState is an array, recursively call each element and return out
   if (Array.isArray(serverState)) {
     serverState.forEach((stateEl: ServerState) =>
-      mergeServerAndLocalState(stateEl, pathToResolver)
+      mergeServerAndLocalState(stateEl, pathToResolvers)
     );
     return;
   }
 
-  // Otherwise iterate through each key value pair in the  pathToResolver object
-  for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
-    // If pathToResolver says resolver locally, update the serverState with the local state
+  // Otherwise iterate through each key value pair in the  pathToResolvers object
+  for (const [pathKey, pathValue] of Object.entries(pathToResolvers)) {
+    // If pathToResolvers says resolver locally, update the serverState with the local state
     if (resolveLocally(pathValue))
       serverState[pathKey] = pathValue.resolveLocally;
     // Otherwise recursively call at the next level of depth in the server and path objects

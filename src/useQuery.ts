@@ -15,7 +15,7 @@ const initialAtomData: AtomData = {
 
 const useQuery = (query: Query, input?: any): AtomDataArray => {
   // Parse the graphQL query
-  const { updatedAST, queryString, pathToResolver, foundClientDirective } =
+  const { updatedAST, queryString, pathToResolvers, foundClientDirective } =
     parseQuery(query);
   // Access the cache
   const { cache, setCache, graphQLClient, resolvePathToResolvers, resolvers } =
@@ -42,8 +42,8 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
           // If there are @client directives in the query, merge the result from
           // the server with local state from the resolvers for those Fields
           if (foundClientDirective) {
-            resolvePathToResolvers(pathToResolver, resolvers);
-            mergeServerAndLocalState(result, pathToResolver);
+            resolvePathToResolvers(pathToResolvers, resolvers);
+            mergeServerAndLocalState(result, pathToResolvers);
           }
           newAtomData.data = result;
           // Set the response in the cache

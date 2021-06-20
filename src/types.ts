@@ -53,7 +53,7 @@ export interface CacheContainer {
   graphQLClient: GraphQLClient;
   resolvers: Resolvers;
   resolvePathToResolvers: (
-    pathToResolver: PathObject,
+    pathToResolvers: PathObject,
     resolvers: Resolvers
   ) => void;
 }
