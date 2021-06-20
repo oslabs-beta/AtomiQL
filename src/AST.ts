@@ -34,13 +34,10 @@ const updatePathToResolverOnFieldEnter = (
   node: FieldNode
 ) => {
   const name: string = node.name.value;
-  const hasChildren = !!node.selectionSet;
   // Add a key of each Field name to pathToResolver
   pathToResolver[name] = {};
   // Add a link from each child Field its parent
   pathToResolver[name].parent = pathToResolver;
-  // Add a boolean to each Field whether it has child fields
-  pathToResolver[name].hasChildren = hasChildren;
   // Return the pathToResolver at the next level of depth
   return pathToResolver[name];
 };
@@ -80,8 +77,7 @@ export const removeFieldsWithClientDirective = (
 
 export const cleanUpPathToResolver = (pathToResolver: any) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
-    if (key === 'hasChildren') delete pathToResolver[key];
-    else if (key === 'parent') delete pathToResolver[key];
+    if (key === 'parent') delete pathToResolver[key];
     else cleanUpPathToResolver(value);
   }
   removeEmptyFields(pathToResolver);
