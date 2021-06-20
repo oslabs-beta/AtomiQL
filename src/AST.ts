@@ -51,7 +51,7 @@ const updatePathToResolverOnLeave = (pathToResolver: any, node: FieldNode) => {
   return pathToResolver;
 };
 
-export const removeFieldsWithClientDirective = (
+export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
   ast: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
@@ -75,20 +75,28 @@ export const removeFieldsWithClientDirective = (
       },
     },
   });
-  if (foundClientDirective) cleanUpPathToResolver(pathToResolver);
+
+  // If @client directive found remove the links from each node to its parent in pathToResolver
+  if (foundClientDirective) removeParentFieldsFromTree(pathToResolver);
+  // Otherwise set pathToResolver to false so we know no @client directives were found
   else pathToResolver = false;
 
   return { updatedAST, pathToResolver };
 };
 
-export const cleanUpPathToResolver = (pathToResolver: any) => {
+// removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
+export const removeParentFieldsFromTree = (pathToResolver: any) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
     if (key === 'parent') delete pathToResolver[key];
-    else cleanUpPathToResolver(value);
+    else removeParentFieldsFromTree(value);
   }
+  // This is an optimization that removes any empty fields from the tree. In this case
+  // that is each Field on the Query that does not have an @client directive. This
+  // improves efficiency as further tree traversals don't have to check these nodes.
   removeEmptyFields(pathToResolver);
 };
 
+// Remove every value of {} in a tree
 export const removeEmptyFields = (pathToResolver: any) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
     if (JSON.stringify(value) === '{}') delete pathToResolver[key];
@@ -116,12 +124,16 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 };
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
+  // Get the AST from the Query
   const AST = getASTFromQuery(query);
-  const queryString = print(AST);
-  const { updatedAST, pathToResolver } = removeFieldsWithClientDirective(AST);
+  // The updated AST has removed all fields with @client directives
+  // The path to resolver is false if there are no @client directives
+  // Otherwise it is an object that describes the path to the resolvers for any @client directives
+  const { updatedAST, pathToResolver } =
+    removeFieldsWithClientDirectiveAndCreatePathToResolver(AST);
   return {
     updatedAST,
-    queryString,
     pathToResolver,
+    queryString: print(AST),
   };
 };
