@@ -49,6 +49,10 @@ export interface PathObject {
   resolveLocally?: any;
   [key: string]: PathObject;
 }
+
+export interface Resolvers {
+  [key: string]: Resolvers | (() => void);
+}
 export interface ServerState {
   [key: string]: ServerState;
 }

@@ -4,12 +4,14 @@ import {
   AtomData,
   AtomiAtomContainer,
   CacheContainer,
+  PathObject,
   ReadQueryOutput,
+  Resolvers,
 } from './types';
 
 interface MyProps {
   url: string;
-  resolvers?: any;
+  resolvers?: Resolvers;
 }
 
 const initialCache: CacheContainer = {
@@ -45,11 +47,12 @@ export default class AtomiProvider extends React.Component<MyProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  resolveLocalState = (pathToResolver: any, resolvers: any) => {
+  resolveLocalState = (pathToResolver: PathObject, resolvers: Resolvers) => {
     for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
-      if (pathValue.resolveLocally)
-        pathValue.resolveLocally = resolvers[pathKey]();
-      else this.resolveLocalState(pathValue, resolvers[pathKey]);
+      const nextResolverNode = resolvers[pathKey]
+      if (pathValue.resolveLocally && typeof nextResolverNode === 'function')
+        pathValue.resolveLocally = nextResolverNode()
+      else if (typeof nextResolverNode === 'object') this.resolveLocalState(pathValue, nextResolverNode);
     }
   };
 
