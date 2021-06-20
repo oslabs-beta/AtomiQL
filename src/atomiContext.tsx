@@ -49,10 +49,11 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   resolveLocalState = (pathToResolver: PathObject, resolvers: Resolvers) => {
     for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
-      const nextResolverNode = resolvers[pathKey]
+      const nextResolverNode = resolvers[pathKey];
       if (pathValue.resolveLocally && typeof nextResolverNode === 'function')
-        pathValue.resolveLocally = nextResolverNode()
-      else if (typeof nextResolverNode === 'object') this.resolveLocalState(pathValue, nextResolverNode);
+        pathValue.resolveLocally = nextResolverNode();
+      else if (typeof nextResolverNode === 'object')
+        this.resolveLocalState(pathValue, nextResolverNode);
     }
   };
 

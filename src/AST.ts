@@ -34,7 +34,10 @@ const directiveIsType = (directives: Directives, type: string) =>
 const nodeHasClientDirective = (node: FieldNode) =>
   nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
 
-const updatePathToResolverOnEnter = (pathToResolver: PathObject, node: FieldNode) => {
+const updatePathToResolverOnEnter = (
+  pathToResolver: PathObject,
+  node: FieldNode
+) => {
   const name: string = node.name.value;
   // Add a key of each Field name to pathToResolver
   pathToResolver[name] = {};
@@ -44,7 +47,10 @@ const updatePathToResolverOnEnter = (pathToResolver: PathObject, node: FieldNode
   return pathToResolver[name];
 };
 
-const updatePathToResolverOnLeave = (pathToResolver: PathObject, node: FieldNode) => {
+const updatePathToResolverOnLeave = (
+  pathToResolver: PathObject,
+  node: FieldNode
+) => {
   // Move pathResolver one level up towards its root
   pathToResolver = pathToResolver.parent;
   const name: string = node.name.value;

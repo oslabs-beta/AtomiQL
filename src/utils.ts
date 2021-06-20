@@ -1,4 +1,4 @@
-import { PathObject, ServerState } from "./types";
+import { PathObject, ServerState } from './types';
 
 export const isObjectAndNotNull = (value: any) =>
   typeof value === 'object' && !!value;
