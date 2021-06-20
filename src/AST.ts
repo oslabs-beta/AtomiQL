@@ -32,10 +32,7 @@ const directiveIsType = (directives: Directives, type: string) =>
 const nodeHasClientDirective = (node: FieldNode) =>
   nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
 
-const updatePathToResolverOnFieldEnter = (
-  pathToResolver: any,
-  node: FieldNode
-) => {
+const updatePathToResolverOnEnter = (pathToResolver: any, node: FieldNode) => {
   const name: string = node.name.value;
   // Add a key of each Field name to pathToResolver
   pathToResolver[name] = {};
@@ -43,6 +40,15 @@ const updatePathToResolverOnFieldEnter = (
   pathToResolver[name].parent = pathToResolver;
   // Return the pathToResolver at the next level of depth
   return pathToResolver[name];
+};
+
+const updatePathToResolverOnLeave = (pathToResolver: any, node: FieldNode) => {
+  // Move pathResolver one level up towards its root
+  pathToResolver = pathToResolver.parent;
+  const name: string = node.name.value;
+  // If this Field has an @client directive tell it to resolveLocally
+  if (nodeHasClientDirective(node)) pathToResolver[name].resolveLocally = true;
+  return pathToResolver;
 };
 
 export const removeFieldsWithClientDirective = (
@@ -53,19 +59,16 @@ export const removeFieldsWithClientDirective = (
   const updatedAST = visit(ast, {
     Field: {
       enter(node: FieldNode) {
-        // Track in pathToResolver each Field in the query
-        pathToResolver = updatePathToResolverOnFieldEnter(pathToResolver, node);
+        // Track in pathToResolver each Field in the query and move  it one level deeper
+        pathToResolver = updatePathToResolverOnEnter(pathToResolver, node);
       },
       leave(node: FieldNode) {
-        // Move pathResolver one level up towards its root
-        pathToResolver = pathToResolver.parent;
-        const name: string = node.name.value;
-        const { directives } = node;
-        // Check if this field has an @client directive
+        // Update and move pathResolver back up one level towards its root
+        pathToResolver = updatePathToResolverOnLeave(pathToResolver, node);
+
+        // If this Field has an @client directive remove it from the AST
         if (nodeHasClientDirective(node)) {
           foundClientDirective = true;
-          // Let pathToResolver know to resolve this Filed locally
-          pathToResolver[name].resolveLocally = true;
           // Returning null removes this field from the AST
           return null;
         }
