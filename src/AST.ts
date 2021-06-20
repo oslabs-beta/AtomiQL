@@ -13,13 +13,11 @@ export type Directives = readonly DirectiveNode[] | undefined;
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
   pathToLocalResolver: any;
-  numberOfClientDirectives: number;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
   pathToLocalResolver: any;
-  numberOfClientDirectives: number;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -37,7 +35,6 @@ export const removeFieldsWithClientDirective = (
   let foundClientDirective = false;
   let pathToLocalResolver: any = {};
   let queryLevel = pathToLocalResolver;
-  let numberOfClientDirectives = 0;
   const updatedAST = visit(ast, {
     Field: {
       enter(node) {
@@ -54,7 +51,6 @@ export const removeFieldsWithClientDirective = (
         const { directives } = node;
         // If the Field has an @client directive, remove this Field
         if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
-          numberOfClientDirectives++;
           queryLevel[name].resolveLocally = true;
           foundClientDirective = true;
           return null;
@@ -70,7 +66,7 @@ export const removeFieldsWithClientDirective = (
     removeEmptyFields(pathToLocalResolver);
   } else pathToLocalResolver = false;
 
-  return { updatedAST, pathToLocalResolver, numberOfClientDirectives };
+  return { updatedAST, pathToLocalResolver };
 };
 
 export const cleanUpPathToLocalResolver = (pathToLocalResolver: any) => {
@@ -112,12 +108,11 @@ export const getQueryStructure = (ast: DocumentNode): UpdatedASTResponse => {
 export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   const queryString = print(AST);
-  const { updatedAST, pathToLocalResolver, numberOfClientDirectives } =
+  const { updatedAST, pathToLocalResolver } =
     removeFieldsWithClientDirective(AST);
   return {
     updatedAST,
     queryString,
     pathToLocalResolver,
-    numberOfClientDirectives,
   };
 };
