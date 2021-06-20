@@ -35,6 +35,7 @@ const updatePathToLocalResolverOnFieldEnter = (
 ) => {
   const name: string = node.name.value;
   const hasChildren = !!node.selectionSet;
+  // Add a key of the Field name to pathToLocalResolver
   pathToLocalResolver[name] = {};
   pathToLocalResolver[name].parent = pathToLocalResolver;
   pathToLocalResolver[name].hasChildren = hasChildren;
@@ -49,14 +50,15 @@ export const removeFieldsWithClientDirective = (
   const updatedAST = visit(ast, {
     Field: {
       enter(node: FieldNode) {
+        // Track in pathToLocalResolver each Field in the query
         pathToLocalResolver = updatePathToLocalResolverOnFieldEnter(
           pathToLocalResolver,
           node
         );
       },
       leave(node: FieldNode) {
-        const name: string = node.name.value;
         pathToLocalResolver = pathToLocalResolver.parent;
+        const name: string = node.name.value;
         const { directives } = node;
         // If the Field has an @client directive, remove this Field
         if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
