@@ -59,7 +59,7 @@ const updatePathToResolversOnLeave = (
   return pathToResolvers;
 };
 
-export const removeFieldsWithClientDirectiveAndCreatepathToResolvers = (
+export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
   AST: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
@@ -136,7 +136,7 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
   const { updatedAST, pathToResolvers, foundClientDirective } =
-    removeFieldsWithClientDirectiveAndCreatepathToResolvers(AST);
+    removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
   return {
     updatedAST,
     pathToResolvers,
