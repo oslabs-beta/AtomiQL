@@ -1,10 +1,4 @@
-export interface PathObject {
-  resolveLocally?: any;
-  [key: string]: PathObject;
-}
-export interface ServerState {
-  [key: string]: ServerState;
-}
+import { PathObject, ServerState } from "./types";
 
 export const isObjectAndNotNull = (value: any) =>
   typeof value === 'object' && !!value;

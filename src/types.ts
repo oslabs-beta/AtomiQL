@@ -44,3 +44,11 @@ export interface CacheContainer {
   resolvers: any;
   resolveLocalState: any;
 }
+
+export interface PathObject {
+  resolveLocally?: any;
+  [key: string]: PathObject;
+}
+export interface ServerState {
+  [key: string]: ServerState;
+}

@@ -6,19 +6,19 @@ import {
   DirectiveNode,
   print,
 } from 'graphql';
-import { Query } from './types';
+import { PathObject, Query } from './types';
 
 export type Directives = readonly DirectiveNode[] | undefined;
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
-  pathToResolver: any;
+  pathToResolver: PathObject;
   foundClientDirective: boolean;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
-  pathToResolver: any;
+  pathToResolver: PathObject;
   foundClientDirective: boolean;
 }
 
@@ -34,7 +34,7 @@ const directiveIsType = (directives: Directives, type: string) =>
 const nodeHasClientDirective = (node: FieldNode) =>
   nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
 
-const updatePathToResolverOnEnter = (pathToResolver: any, node: FieldNode) => {
+const updatePathToResolverOnEnter = (pathToResolver: PathObject, node: FieldNode) => {
   const name: string = node.name.value;
   // Add a key of each Field name to pathToResolver
   pathToResolver[name] = {};
@@ -44,7 +44,7 @@ const updatePathToResolverOnEnter = (pathToResolver: any, node: FieldNode) => {
   return pathToResolver[name];
 };
 
-const updatePathToResolverOnLeave = (pathToResolver: any, node: FieldNode) => {
+const updatePathToResolverOnLeave = (pathToResolver: PathObject, node: FieldNode) => {
   // Move pathResolver one level up towards its root
   pathToResolver = pathToResolver.parent;
   const name: string = node.name.value;
@@ -57,7 +57,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
   AST: DocumentNode
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
-  let pathToResolver: any = {};
+  let pathToResolver: PathObject = {};
   const updatedAST = visit(AST, {
     Field: {
       enter(node: FieldNode) {
@@ -85,7 +85,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolver = (
 };
 
 // removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
-export const removeParentFieldsFromTree = (pathToResolver: any) => {
+export const removeParentFieldsFromTree = (pathToResolver: PathObject) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
     if (key === 'parent') delete pathToResolver[key];
     else removeParentFieldsFromTree(value);
@@ -97,7 +97,7 @@ export const removeParentFieldsFromTree = (pathToResolver: any) => {
 };
 
 // Remove every value of {} in a tree
-export const removeEmptyFields = (pathToResolver: any) => {
+export const removeEmptyFields = (pathToResolver: PathObject) => {
   for (const [key, value] of Object.entries(pathToResolver)) {
     if (JSON.stringify(value) === '{}') delete pathToResolver[key];
     else removeEmptyFields(value);
@@ -105,8 +105,8 @@ export const removeEmptyFields = (pathToResolver: any) => {
 };
 
 // Use this function to get a simple definition of the structure of a graphQL query
-export const getQueryStructure = (AST: DocumentNode): UpdatedASTResponse => {
-  const queryStructure: any = {};
+export const getQueryStructure = (AST: DocumentNode): PathObject => {
+  const queryStructure: PathObject = {};
   let pathToResolver = queryStructure;
   visit(AST, {
     Field: {
@@ -116,7 +116,7 @@ export const getQueryStructure = (AST: DocumentNode): UpdatedASTResponse => {
         pathToResolver[name].parent = pathToResolver;
         pathToResolver = pathToResolver[name];
       },
-      leave(node) {
+      leave() {
         pathToResolver = pathToResolver.parent;
       },
     },
