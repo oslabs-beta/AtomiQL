@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import React from 'react';
+import { parseQuery } from './AST';
 import {
   AtomData,
   AtomiAtomContainer,
@@ -68,7 +69,10 @@ export default class AtomiProvider extends React.Component<MyProps> {
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
-    if (!atomiAtomContainer) throw new Error('Query not cached');
+    if (!atomiAtomContainer) {
+      console.error('Query not cached');
+      throw new Error('Query not cached');
+    }
     return atomiAtomContainer;
   };
 
@@ -91,7 +95,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Read the data and get the writeAtom function associated with a certain
   readQuery = (query: string): ReadQueryOutput => {
-    const atomiAtomContainer = this.getAtomiAtomContainer(query);
+    const { queryString } = parseQuery(query)
+    const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
     const { data } = atomiAtomContainer.atomData;
     const writeAtom = (newData: any) =>
       this.writeAtom(atomiAtomContainer, newData);

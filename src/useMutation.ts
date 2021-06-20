@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
-import { AtomData, CacheContainer } from './types';
+import { AtomData, CacheContainer, Query } from './types';
 import { AtomiContext } from './atomiContext';
+import { parseQuery } from './AST';
 
 const initialData: AtomData = {
   loading: false,
@@ -14,9 +15,10 @@ interface MutationArg {
 type MutationCallback = (arg1: CacheContainer, arg2: AtomData) => void;
 
 const useMutation = (
-  query: string,
+  query: Query,
   callback?: MutationCallback
 ): [(arg1: MutationArg) => void, AtomData] => {
+  const { queryString } = parseQuery(query)
   const cacheContainer = useContext(AtomiContext);
   const { graphQLClient } = cacheContainer;
   const [response, setResponse] = useState(initialData);
@@ -27,7 +29,7 @@ const useMutation = (
       loading: true,
     });
     try {
-      const result = await graphQLClient.request(query, mutationArg);
+      const result = await graphQLClient.request(queryString, mutationArg);
       const newResponse: AtomData = {
         data: result,
         loading: false,
