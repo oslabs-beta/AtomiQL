@@ -26,13 +26,23 @@ export type AtomiAtom = Atom<AtomData> & {
 export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
-  writeAtom: (update: SetStateAction<AtomData>) => void | Promise<void>;
+  setAtom: (update: SetStateAction<AtomData>) => void | Promise<void>;
 }
 
 export interface ReadQueryOutput {
   writeAtom: (arg1: any) => void;
   data: any;
 }
+
+export interface Resolvers {
+  [key: string]: Resolvers | (() => void);
+}
+
+export interface PathObject {
+  resolveLocally?: any;
+  [key: string]: PathObject;
+}
+
 export interface CacheContainer {
   url: string;
   readQuery: (arg1: string) => ReadQueryOutput;
@@ -41,18 +51,10 @@ export interface CacheContainer {
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
-  resolvers: any;
-  resolveLocalState: any;
+  resolvers: Resolvers;
+  resolvePathToResolvers: (pathToResolver: PathObject, resolvers: Resolvers) => void;
 }
 
-export interface PathObject {
-  resolveLocally?: any;
-  [key: string]: PathObject;
-}
-
-export interface Resolvers {
-  [key: string]: Resolvers | (() => void);
-}
 export interface ServerState {
   [key: string]: ServerState;
 }
