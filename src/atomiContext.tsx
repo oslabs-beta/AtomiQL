@@ -23,7 +23,7 @@ const initialCache: CacheContainer = {
   cache: {},
   graphQLClient: new GraphQLClient(''),
   resolvers: {},
-  resolveLocalState: () => ({}),
+  resolvePathToResolvers: () => ({}),
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -42,20 +42,22 @@ export default class AtomiProvider extends React.Component<MyProps> {
       cache: {},
       graphQLClient,
       resolvers: resolvers || {},
-      resolveLocalState: this.resolveLocalState,
+      resolvePathToResolvers: this.resolvePathToResolvers,
     };
     this.cacheContainer = cacheContainer;
   }
 
-  resolveLocalState = (pathToResolver: PathObject, resolvers: Resolvers) => {
+  // Update the path to resolvers object with the resolved local state
+  resolvePathToResolvers = (pathToResolver: PathObject, resolvers: Resolvers) => {
     for (const [pathKey, pathValue] of Object.entries(pathToResolver)) {
       const nextResolverNode = resolvers[pathKey]
       if (pathValue.resolveLocally && typeof nextResolverNode === 'function')
         pathValue.resolveLocally = nextResolverNode()
-      else if (typeof nextResolverNode === 'object') this.resolveLocalState(pathValue, nextResolverNode);
+      else if (typeof nextResolverNode === 'object') this.resolvePathToResolvers(pathValue, nextResolverNode);
     }
   };
 
+  // Store in the cache an atom container associated with a certain query
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
     this.cacheContainer.cache = {
       ...this.cacheContainer.cache,
@@ -63,31 +65,36 @@ export default class AtomiProvider extends React.Component<MyProps> {
     };
   };
 
+  // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
     if (!atomiAtomContainer) throw new Error('Query not cached');
     return atomiAtomContainer;
   };
 
+  // Update the value of the atoms associated with a certain query
   writeQuery = (query: string, newData: any) => {
     const atomiAtomContainer = this.getAtomiAtomContainer(query);
-    this.updateAtom(atomiAtomContainer, newData);
+    this.writeAtom(atomiAtomContainer, newData);
   };
 
-  updateAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any) => {
-    const { atomData, writeAtom } = atomiAtomContainer;
+  // Use this function to update the value of any Atoms
+  // DO NOT USE setAtom directly
+  writeAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any) => {
+    const { atomData, setAtom } = atomiAtomContainer;
     atomData.data = newData;
-    writeAtom((oldAtomData: AtomData) => ({
+    setAtom((oldAtomData: AtomData) => ({
       ...oldAtomData,
       data: newData,
     }));
   };
 
+  // Read the data and get the writeAtom function associated with a certain
   readQuery = (query: string): ReadQueryOutput => {
     const atomiAtomContainer = this.getAtomiAtomContainer(query);
     const { data } = atomiAtomContainer.atomData;
     const writeAtom = (newData: any) =>
-      this.updateAtom(atomiAtomContainer, newData);
+      this.writeAtom(atomiAtomContainer, newData);
 
     return {
       data,
