@@ -35,10 +35,13 @@ const updatePathToResolverOnFieldEnter = (
 ) => {
   const name: string = node.name.value;
   const hasChildren = !!node.selectionSet;
-  // Add a key of the Field name to pathToResolver
+  // Add a key of each Field name to pathToResolver
   pathToResolver[name] = {};
+  // Add a link from each child Field its parent
   pathToResolver[name].parent = pathToResolver;
+  // Add a boolean to each Field whether it has child fields
   pathToResolver[name].hasChildren = hasChildren;
+  // Return the pathToResolver at the next level of depth
   return pathToResolver[name];
 };
 
@@ -54,18 +57,18 @@ export const removeFieldsWithClientDirective = (
         pathToResolver = updatePathToResolverOnFieldEnter(pathToResolver, node);
       },
       leave(node: FieldNode) {
+        // Move pathResolver one level up towards its root
         pathToResolver = pathToResolver.parent;
         const name: string = node.name.value;
         const { directives } = node;
-        // If the Field has an @client directive, remove this Field
+        // Check if this field has an @client directive
         if (nodeHasDirectives(node) && directiveIsType(directives, 'client')) {
-          pathToResolver[name].resolveLocally = true;
           foundClientDirective = true;
+          // Let pathToResolver know to resolve this Filed locally
+          pathToResolver[name].resolveLocally = true;
+          // Returning null removes this field from the AST
           return null;
         }
-        if (!pathToResolver[name].hasChildren) delete pathToResolver[name];
-
-        return node;
       },
     },
   });
