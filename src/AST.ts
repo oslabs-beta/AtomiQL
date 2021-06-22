@@ -14,12 +14,14 @@ export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
+  sendQueryToServer: boolean;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
+  sendQueryToServer: boolean;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -64,11 +66,19 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
   let pathToResolvers: PathObject = {};
+  const selectionSetLengths: { end?: number; start?: number; }[] = []
+  let i = 0;
   const updatedAST = visit(AST, {
     Field: {
-      enter(node: FieldNode) {
+      enter(node: FieldNode) {        
         // Track in pathToResolvers each Field in the query and move  it one level deeper
         pathToResolvers = updatePathToResolversOnEnter(pathToResolvers, node);
+
+        const { selectionSet } = node;
+        if (selectionSet) {
+          selectionSetLengths.push({ start: selectionSet.selections.length  })
+          i++;
+        }
       },
       leave(node: FieldNode) {
         // Update and move pathResolver back up one level towards its root
@@ -80,14 +90,32 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
           // Returning null removes this field from the AST
           return null;
         }
+
+        const { selectionSet } = node;
+        if (selectionSet) {
+          i--;
+          const selection = selectionSetLengths[i]
+          selection.end = selectionSet.selections.length;
+          if (selection.start && !selection.end) {
+            // console.log(`node`, node)
+            return null;
+          }
+        }
       },
     },
   });
-
   // If @client directive found remove the links from each node to its parent in pathToResolvers
   if (foundClientDirective) removeParentFieldsFromTree(pathToResolvers);
+  console.log(`updatedAST`, updatedAST)
+  console.log(`selectionSetLengths`, selectionSetLengths)
+  console.log(`pathToResolvers`, pathToResolvers);
 
-  return { updatedAST, pathToResolvers, foundClientDirective };
+  let sendQueryToServer = true;
+  const rootSelectionSet = selectionSetLengths[0];
+  if (!!rootSelectionSet && rootSelectionSet.start && !rootSelectionSet.end) {
+    sendQueryToServer = false;
+  }
+  return { updatedAST, pathToResolvers, foundClientDirective, sendQueryToServer };
 };
 
 // removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
@@ -135,12 +163,13 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
-  const { updatedAST, pathToResolvers, foundClientDirective } =
+  const { updatedAST, pathToResolvers, foundClientDirective, sendQueryToServer } =
     removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
   return {
     updatedAST,
     pathToResolvers,
     queryString: print(AST),
     foundClientDirective,
+    sendQueryToServer
   };
 };
