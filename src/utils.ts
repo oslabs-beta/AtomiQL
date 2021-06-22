@@ -29,7 +29,7 @@ export const mergeServerAndLocalState = (
     if (resolveLocally(pathValue))
       serverState[pathKey] = pathValue.resolveLocally;
     // If we are resolving a whole SelectionSet locally, add the SelectionSet root node to the serverState
-    else if (serverState[pathKey] === undefined) serverState[pathKey] = {}
+    else if (serverState[pathKey] === undefined) serverState[pathKey] = {};
     // Otherwise recursively call at the next level of depth in the server and path objects
     else mergeServerAndLocalState(serverState[pathKey], pathValue);
   }

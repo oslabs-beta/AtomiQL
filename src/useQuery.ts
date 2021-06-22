@@ -15,8 +15,13 @@ const initialAtomData: AtomData = {
 
 const useQuery = (query: Query, input?: any): AtomDataArray => {
   // Parse the graphQL query
-  const { updatedAST, queryString, pathToResolvers, foundClientDirective, sendQueryToServer } =
-    parseQuery(query);
+  const {
+    updatedAST,
+    queryString,
+    pathToResolvers,
+    foundClientDirective,
+    sendQueryToServer,
+  } = parseQuery(query);
   // Access the cache
   const { cache, setCache, graphQLClient, resolvePathToResolvers, resolvers } =
     useContext(AtomiContext);
@@ -37,7 +42,7 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
           hasError: false,
         };
         try {
-          let result = {}
+          let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
             result = await graphQLClient.request(updatedAST, input);
