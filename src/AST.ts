@@ -66,17 +66,17 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
   let pathToResolvers: PathObject = {};
-  const selectionSetLengths: { end?: number; start?: number; }[] = []
+  const selectionSetLengths: { end?: number; start?: number }[] = [];
   let i = 0;
   const updatedAST = visit(AST, {
     Field: {
-      enter(node: FieldNode) {        
+      enter(node: FieldNode) {
         // Track in pathToResolvers each Field in the query and move  it one level deeper
         pathToResolvers = updatePathToResolversOnEnter(pathToResolvers, node);
 
         const { selectionSet } = node;
         if (selectionSet) {
-          selectionSetLengths.push({ start: selectionSet.selections.length  })
+          selectionSetLengths.push({ start: selectionSet.selections.length });
           i++;
         }
       },
@@ -94,7 +94,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
         const { selectionSet } = node;
         if (selectionSet) {
           i--;
-          const selection = selectionSetLengths[i]
+          const selection = selectionSetLengths[i];
           selection.end = selectionSet.selections.length;
           if (selection.start && !selection.end) return null;
         }
@@ -109,7 +109,12 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
   if (!!rootSelectionSet && rootSelectionSet.start && !rootSelectionSet.end) {
     sendQueryToServer = false;
   }
-  return { updatedAST, pathToResolvers, foundClientDirective, sendQueryToServer };
+  return {
+    updatedAST,
+    pathToResolvers,
+    foundClientDirective,
+    sendQueryToServer,
+  };
 };
 
 // removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
@@ -157,13 +162,17 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
-  const { updatedAST, pathToResolvers, foundClientDirective, sendQueryToServer } =
-    removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
+  const {
+    updatedAST,
+    pathToResolvers,
+    foundClientDirective,
+    sendQueryToServer,
+  } = removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
   return {
     updatedAST,
     pathToResolvers,
     queryString: print(AST),
     foundClientDirective,
-    sendQueryToServer
+    sendQueryToServer,
   };
 };
