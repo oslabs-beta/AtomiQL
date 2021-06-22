@@ -22,14 +22,13 @@ export const mergeServerAndLocalState = (
     );
     return;
   }
-
   // Otherwise iterate through each key value pair in the  pathToResolvers object
   for (const [pathKey, pathValue] of Object.entries(pathToResolvers)) {
+    // If we are resolving a whole SelectionSet locally, add the SelectionSet root node to the serverState
+    if (serverState[pathKey] === undefined) serverState[pathKey] = {}
     // If pathToResolvers says resolver locally, update the serverState with the local state
     if (resolveLocally(pathValue))
       serverState[pathKey] = pathValue.resolveLocally;
-    // If we are resolving a whole SelectionSet locally, add the SelectionSet root node to the serverState
-    else if (serverState[pathKey] === undefined) serverState[pathKey] = {}
     // Otherwise recursively call at the next level of depth in the server and path objects
     else mergeServerAndLocalState(serverState[pathKey], pathValue);
   }
