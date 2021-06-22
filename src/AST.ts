@@ -96,19 +96,13 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
           i--;
           const selection = selectionSetLengths[i]
           selection.end = selectionSet.selections.length;
-          if (selection.start && !selection.end) {
-            // console.log(`node`, node)
-            return null;
-          }
+          if (selection.start && !selection.end) return null;
         }
       },
     },
   });
   // If @client directive found remove the links from each node to its parent in pathToResolvers
   if (foundClientDirective) removeParentFieldsFromTree(pathToResolvers);
-  console.log(`updatedAST`, updatedAST)
-  console.log(`selectionSetLengths`, selectionSetLengths)
-  console.log(`pathToResolvers`, pathToResolvers);
 
   let sendQueryToServer = true;
   const rootSelectionSet = selectionSetLengths[0];
