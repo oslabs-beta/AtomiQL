@@ -1,4 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
+import { atom } from 'jotai';
 import React from 'react';
 import { parseQuery } from './AST';
 import {
@@ -108,7 +109,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
     }));
   };
 
-  // Read the data and get the writeAtom function associated with a certain
+  // Read the data and get the writeAtom function associated with a certain query
   readQuery = (query: string): ReadQueryOutput => {
     // Parse the query into a reliable format
     const { queryString } = parseQuery(query);
