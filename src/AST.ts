@@ -8,7 +8,7 @@ import {
 } from 'graphql';
 import { PathObject, Query } from './types';
 
-export type Directives = readonly DirectiveNode[] | undefined;
+export type Directives = readonly DirectiveNode[];
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
@@ -30,11 +30,11 @@ export const getASTFromQuery = (query: Query): DocumentNode =>
 const nodeHasDirectives = (node: FieldNode): boolean =>
   !!node.directives && node.directives.length > 0;
 
-const directiveIsType = (directives: Directives, type: string) =>
+const directiveIsType = (type: string, directives?: Directives) =>
   !!directives && directives[0].name.value === type;
 
 const nodeHasClientDirective = (node: FieldNode) =>
-  nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
+  nodeHasDirectives(node) && directiveIsType('client', node.directives);
 
 const updatePathToResolversOnEnter = (
   pathToResolvers: PathObject,
