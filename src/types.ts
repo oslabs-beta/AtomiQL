@@ -26,7 +26,7 @@ export type AtomiAtom = Atom<AtomData> & {
 export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
-  setAtom: (update: SetStateAction<AtomData>) => void | Promise<void>;
+  setAtom: ((update: SetStateAction<AtomData>) => void | Promise<void>) | undefined;
 }
 
 export interface ReadQueryOutput {
@@ -56,6 +56,8 @@ export interface CacheContainer {
     pathToResolvers: PathObject,
     resolvers: Resolvers
   ) => void;
+  getAtomiAtomContainer: (query: string) => AtomiAtomContainer;
+  writeQuery: (query: string, newData: any) => void;
 }
 
 export interface ServerState {
