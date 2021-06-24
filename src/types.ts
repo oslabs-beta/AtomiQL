@@ -20,15 +20,13 @@ export interface AtomData {
 
 export type AtomiAtom = Atom<AtomData> & {
   write: Write<SetStateAction<AtomData>>;
-  onMount?: OnMount<SetStateAction<AtomData>> | undefined;
+  onMount?: OnMount<SetStateAction<AtomData>>;
 } & WithInitialValue<AtomData>;
 
 export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
-  setAtom:
-    | ((update: SetStateAction<AtomData>) => void | Promise<void>)
-    | undefined;
+  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>
 }
 
 export interface ReadQueryOutput {
