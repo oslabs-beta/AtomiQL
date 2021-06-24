@@ -106,13 +106,18 @@ export class AtomiProvider extends React.Component<MyProps> {
       // Set loading to false as we have set the data
       this.writeAtom(atomiAtomContainer, newData, false);
     } else {
+      const newAtomData: AtomData = {
+        data: newData,
+        loading: false,
+        hasError: false,
+      };
       // AtomContainer not cached, so create it.
       atomiAtomContainer = {
-        atom: atom(newData),
+        atom: atom(newAtomData),
         atomData: {
           loading: false,
           hasError: false,
-          data: newData
+          data: newAtomData
         },
         setAtom: undefined
       }
