@@ -26,11 +26,21 @@ const initialCache: CacheContainer = {
   graphQLClient: new GraphQLClient(''),
   resolvers: {},
   resolvePathToResolvers: () => ({}),
+  getAtomiAtomContainer: () => ({
+    atom: atom({}),
+    atomData: {
+      loading: false,
+      hasError: false,
+      data: {}
+    },
+    setAtom: undefined,
+  }),
+  writeQuery: () => ({})
 };
 
 export const AtomiContext = React.createContext(initialCache);
 
-export default class AtomiProvider extends React.Component<MyProps> {
+export class AtomiProvider extends React.Component<MyProps> {
   cacheContainer: CacheContainer;
 
   constructor(props: MyProps) {
@@ -45,6 +55,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
       graphQLClient,
       resolvers: resolvers || {},
       resolvePathToResolvers: this.resolvePathToResolvers,
+      getAtomiAtomContainer: this.getAtomiAtomContainer,
+      writeQuery: this.writeQuery,
     };
     this.cacheContainer = cacheContainer;
   }
@@ -79,34 +91,67 @@ export default class AtomiProvider extends React.Component<MyProps> {
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
     const atomiAtomContainer = this.cacheContainer.cache[query];
     // If we cannot find the atom container, throw an error
-    if (!atomiAtomContainer) {
-      console.error('Query not cached');
-      throw new Error('Query not cached');
-    }
     return atomiAtomContainer;
   };
 
+  isQueryCached = (query: string): boolean => !!this.cacheContainer.cache[query];
+
   // Update the value of the atoms associated with a certain query
-  writeQuery = (query: string, newData: any) => {
+  writeQuery = (queryInput: string, newData: any) => {
+    const {queryString: query} = parseQuery(queryInput)
     // Get the atom container associated with the query
-    const atomiAtomContainer = this.getAtomiAtomContainer(query);
-    // Overwrite the atom the with the new data
-    this.writeAtom(atomiAtomContainer, newData);
+    let atomiAtomContainer = this.getAtomiAtomContainer(query);
+    if (atomiAtomContainer && atomiAtomContainer.setAtom) {
+      // Overwrite the atom the with the new data
+      // Set loading to false as we have set the data
+      this.writeAtom(atomiAtomContainer, newData, false);
+    } else {
+      // AtomContainer not cached, so create it.
+      atomiAtomContainer = {
+        atom: atom(newData),
+        atomData: {
+          loading: false,
+          hasError: false,
+          data: newData
+        },
+        setAtom: undefined
+      }
+      // Store it in the cache
+      this.setCache(query, atomiAtomContainer);
+    }
   };
+
+
 
   // Use this function to write/update the value of any Atoms
   // DO NOT USE setAtom directly
-  writeAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any) => {
+  writeAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any, loading: boolean | undefined = undefined) => {
     const { atomData, setAtom } = atomiAtomContainer;
     // Update the atomData.data value with the newData
     // We do this so that we can access the atomData without invoking the useAtom hook
     // This is because the useAtom hook can only be invoked at the top of a react function component
     atomData.data = newData;
+    if (typeof loading !== 'undefined') atomData.loading = loading;
     // Then update the atom itself with the new data
-    setAtom((oldAtomData: AtomData) => ({
-      ...oldAtomData,
-      data: newData,
-    }));
+    if (setAtom) {
+      if (typeof loading === 'undefined') {
+        setAtom((oldAtomData: AtomData) => ({
+          ...oldAtomData,
+          data: newData,
+        }));
+      } else {
+        setAtom((oldAtomData: AtomData) => ({
+          ...oldAtomData,
+          loading,
+          data: newData,
+        }));
+      }
+
+    } else {
+      console.error('Cannot writeAtom if setAtom is undefined.')
+      throw new Error('Cannot writeAtom if setAtom is undefined.');
+    }
+
   };
 
   // Read the data and get the writeAtom function associated with a certain query
@@ -115,6 +160,10 @@ export default class AtomiProvider extends React.Component<MyProps> {
     const { queryString } = parseQuery(query);
     // Get the atom container
     const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
+    if (!atomiAtomContainer) {
+      console.error('Query not cached');
+      throw new Error('Query not cached');
+    }
     // Extract the data from the atom container
     const { data } = atomiAtomContainer.atomData;
     // Create the writeAtom function for this this particular atom
