@@ -46,7 +46,8 @@ const useQuery = (query: Query, input?: any, isLocal: boolean = false): AtomData
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
-            result = await graphQLClient.request(updatedAST, input);
+            const variables = input ? input.variables : undefined
+            result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from
           // the server with local state from the resolvers for those Fields
@@ -80,9 +81,10 @@ const useQuery = (query: Query, input?: any, isLocal: boolean = false): AtomData
         // Save the setAtom function so it becomes accessible
         setCache(queryString, {
           atom: activeAtom,
-          atomData,
+          atomData: cachedAtomContainer.atomData,
           setAtom,
         })
+        setAtom(cachedAtomContainer.atomData)
       }
       if (isLocal && !cachedAtom) {
         // If the query is Local and there is no cache hit
@@ -103,9 +105,14 @@ const useQuery = (query: Query, input?: any, isLocal: boolean = false): AtomData
     /* eslint react-hooks/exhaustive-deps:0 */
   }, []);
 
+  // If the atom is empty, assume the values of loading and hasError
+  if (isAtomEmpty(atomData)) return [null, true, false]
+
   // Return to the user data about and response from their request
   return [atomData.data, atomData.loading, atomData.hasError];
 };
+
+const isAtomEmpty = (atomData: any) => typeof atomData.loading === 'undefined' && typeof atomData.loading === 'undefined' 
 
 export const GetAtom = (): AtomData => {
   const [atomData] = useAtom(atom(initialAtomData));
