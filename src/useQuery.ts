@@ -41,7 +41,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
 
   useEffect(() => {
     (async () => {
-      // If the atom is cached do not query the server
+      // If the atom is cached or it is a local only query do not query the server
       if (!cachedAtom && !isLocal) {
         const newAtomData: AtomData = {
           data: null,
@@ -82,20 +82,20 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           // Update the value of the Jotai atom
           setAtom(newAtomData);
         }
-      } else if (cachedAtomContainer && !cachedAtomContainer.setAtom) {
-        // If atom is cached but setAtom function is not defined
+      }
+      // If atom is cached but setAtom function is not defined
+      if (cachedAtomContainer && !cachedAtomContainer.setAtom) {
         // Save the setAtom function so it becomes accessible
         setCache(queryString, {
           atom: activeAtom,
-          atomData: cachedAtomContainer.atomData,
+          atomData,
           setAtom,
         })
-        setAtom(cachedAtomContainer.atomData)
       }
+      // If the query is Local and there is no cache hit
       if (isLocal && !cachedAtom) {
-        // If the query is Local and there is no cache hit
-        // Set the cache wit data null so that writeQuery
-        // will update this atom
+        // Set the cache with data null so that writeQuery
+        // will update this atom and effect state changes
         const newAtomData: AtomData = {
           data: null,
           loading: true,
