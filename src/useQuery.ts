@@ -13,7 +13,8 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const useQuery = (query: Query, input?: any, isLocal: boolean = false): AtomDataArray => {
+const useQuery = (query: Query, input?: any): AtomDataArray => {
+  const isLocal = input && input.isLocal
   // Parse the graphQL query
   const {
     updatedAST,
