@@ -134,7 +134,7 @@ export class AtomiProvider extends React.Component<MyProps> {
   writeAtom = (
     atomiAtomContainer: AtomiAtomContainer,
     newData: any,
-    loading: boolean | undefined = undefined
+    loading?: boolean
   ) => {
     const { atomData, setAtom } = atomiAtomContainer;
     // Update the atomData.data value with the newData
@@ -144,18 +144,11 @@ export class AtomiProvider extends React.Component<MyProps> {
     if (typeof loading !== 'undefined') atomData.loading = loading;
     // Then update the atom itself with the new data
     if (setAtom) {
-      if (typeof loading === 'undefined') {
-        setAtom((oldAtomData: AtomData) => ({
-          ...oldAtomData,
-          data: newData,
-        }));
-      } else {
-        setAtom((oldAtomData: AtomData) => ({
-          ...oldAtomData,
-          loading,
-          data: newData,
-        }));
-      }
+      setAtom((oldAtomData: AtomData) => ({
+        ...oldAtomData,
+        loading: typeof loading === 'undefined' ? oldAtomData.loading : loading,
+        data: newData,
+      }));
     } else {
       console.error('Cannot writeAtom if setAtom is undefined.');
       throw new Error('Cannot writeAtom if setAtom is undefined.');
