@@ -13,7 +13,7 @@ const initialAtomData: AtomData = {
   hasError: false,
 };
 
-const useQuery = (query: Query, input?: any): AtomDataArray => {
+const useQuery = (query: Query, input?: any, isLocal: boolean = false): AtomDataArray => {
   // Parse the graphQL query
   const {
     updatedAST,
@@ -23,7 +23,7 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
     sendQueryToServer,
   } = parseQuery(query);
   // Access the cache
-  const { cache, setCache, graphQLClient, resolvePathToResolvers, resolvers, getAtomiAtomContainer } =
+  const { setCache, graphQLClient, resolvePathToResolvers, resolvers, getAtomiAtomContainer } =
     useContext(AtomiContext);
   // Look for a cachedAtomContainer
   const cachedAtomContainer = getAtomiAtomContainer(queryString)
@@ -36,7 +36,7 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
   useEffect(() => {
     (async () => {
       // If the atom is cached do not query the server
-      if (!cachedAtom) {
+      if (!cachedAtom && !isLocal) {
         const newAtomData: AtomData = {
           data: null,
           loading: false,
@@ -75,12 +75,29 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
           // Update the value of the Jotai atom
           setAtom(newAtomData);
         }
-      } else if (!cachedAtomContainer.setAtom) {
+      } else if (cachedAtomContainer && !cachedAtomContainer.setAtom) {
+        // If atom is cached but setAtom function is not defined
+        // Save the setAtom function so it becomes accessible
         setCache(queryString, {
           atom: activeAtom,
           atomData,
           setAtom,
         })
+      }
+      if (isLocal && !cachedAtom) {
+        // If the query is Local and there is no cache hit
+        // Set the cache wit data null so that writeQuery
+        // will update this atom
+        const newAtomData: AtomData = {
+          data: null,
+          loading: true,
+          hasError: false,
+        };
+        setCache(queryString, {
+          atom: activeAtom,
+          atomData: newAtomData,
+          setAtom,
+        });
       }
     })();
     /* eslint react-hooks/exhaustive-deps:0 */
