@@ -31,11 +31,11 @@ const initialCache: CacheContainer = {
     atomData: {
       loading: false,
       hasError: false,
-      data: {}
+      data: {},
     },
     setAtom: undefined,
   }),
-  writeQuery: () => ({})
+  writeQuery: () => ({}),
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -94,11 +94,12 @@ export class AtomiProvider extends React.Component<MyProps> {
     return atomiAtomContainer;
   };
 
-  isQueryCached = (query: string): boolean => !!this.cacheContainer.cache[query];
+  isQueryCached = (query: string): boolean =>
+    !!this.cacheContainer.cache[query];
 
   // Update the value of the atoms associated with a certain query
   writeQuery = (queryInput: string, newData: any) => {
-    const { queryString: query } = parseQuery(queryInput)
+    const { queryString: query } = parseQuery(queryInput);
     // Get the atom container associated with the query
     let atomiAtomContainer = this.getAtomiAtomContainer(query);
     // If the query is cached and setAtom is set
@@ -119,20 +120,22 @@ export class AtomiProvider extends React.Component<MyProps> {
         atomData: {
           loading: false,
           hasError: false,
-          data: newAtomData
+          data: newAtomData,
         },
-        setAtom: undefined
-      }
+        setAtom: undefined,
+      };
       // Store it in the cache
       this.setCache(query, atomiAtomContainer);
     }
   };
 
-
-
   // Use this function to write/update the value of any Atoms
   // DO NOT USE setAtom directly
-  writeAtom = (atomiAtomContainer: AtomiAtomContainer, newData: any, loading: boolean | undefined = undefined) => {
+  writeAtom = (
+    atomiAtomContainer: AtomiAtomContainer,
+    newData: any,
+    loading: boolean | undefined = undefined
+  ) => {
     const { atomData, setAtom } = atomiAtomContainer;
     // Update the atomData.data value with the newData
     // We do this so that we can access the atomData without invoking the useAtom hook
@@ -154,10 +157,9 @@ export class AtomiProvider extends React.Component<MyProps> {
         }));
       }
     } else {
-      console.error('Cannot writeAtom if setAtom is undefined.')
+      console.error('Cannot writeAtom if setAtom is undefined.');
       throw new Error('Cannot writeAtom if setAtom is undefined.');
     }
-
   };
 
   // Read the data and get the writeAtom function associated with a certain query
