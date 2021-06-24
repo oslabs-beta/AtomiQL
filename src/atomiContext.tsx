@@ -98,14 +98,16 @@ export class AtomiProvider extends React.Component<MyProps> {
 
   // Update the value of the atoms associated with a certain query
   writeQuery = (queryInput: string, newData: any) => {
-    const {queryString: query} = parseQuery(queryInput)
+    const { queryString: query } = parseQuery(queryInput)
     // Get the atom container associated with the query
     let atomiAtomContainer = this.getAtomiAtomContainer(query);
+    // If the query is cached and setAtom is set
     if (atomiAtomContainer && atomiAtomContainer.setAtom) {
       // Overwrite the atom the with the new data
       // Set loading to false as we have set the data
       this.writeAtom(atomiAtomContainer, newData, false);
     } else {
+      // If query does not exist in the cache, set the cache
       const newAtomData: AtomData = {
         data: newData,
         loading: false,
@@ -151,7 +153,6 @@ export class AtomiProvider extends React.Component<MyProps> {
           data: newData,
         }));
       }
-
     } else {
       console.error('Cannot writeAtom if setAtom is undefined.')
       throw new Error('Cannot writeAtom if setAtom is undefined.');
@@ -166,6 +167,7 @@ export class AtomiProvider extends React.Component<MyProps> {
     // Get the atom container
     const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
     if (!atomiAtomContainer) {
+      // If the query is not cached, you cannot read it
       console.error('Query not cached');
       throw new Error('Query not cached');
     }
