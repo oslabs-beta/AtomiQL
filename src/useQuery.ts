@@ -19,7 +19,7 @@ interface UseQueryInput {
 }
 
 const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
-  const isLocal = input && input.isLocal
+  const isLocal = input && input.isLocal;
   // Parse the graphQL query
   const {
     updatedAST,
@@ -29,10 +29,15 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
     sendQueryToServer,
   } = parseQuery(query);
   // Access the cache
-  const { setCache, graphQLClient, resolvePathToResolvers, resolvers, getAtomiAtomContainer } =
-    useContext(AtomiContext);
+  const {
+    setCache,
+    graphQLClient,
+    resolvePathToResolvers,
+    resolvers,
+    getAtomiAtomContainer,
+  } = useContext(AtomiContext);
   // Look for a cachedAtomContainer
-  const cachedAtomContainer = getAtomiAtomContainer(queryString)
+  const cachedAtomContainer = getAtomiAtomContainer(queryString);
   const cachedAtom = cachedAtomContainer ? cachedAtomContainer.atom : null;
   // If there is no cached atom, set the active atom to be a new atom
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
@@ -52,7 +57,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
-            const variables = input ? input.variables : undefined
+            const variables = input ? input.variables : undefined;
             result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from
@@ -90,7 +95,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           atom: activeAtom,
           atomData,
           setAtom,
-        })
+        });
       }
       // If the query is Local and there is no cache hit
       if (isLocal && !cachedAtom) {
@@ -112,13 +117,15 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   }, []);
 
   // If the atom is empty, assume the values of loading and hasError
-  if (isAtomEmpty(atomData)) return [null, true, false]
+  if (isAtomEmpty(atomData)) return [null, true, false];
 
   // Return to the user data about and response from their request
   return [atomData.data, atomData.loading, atomData.hasError];
 };
 
-const isAtomEmpty = (atomData: any) => typeof atomData.loading === 'undefined' && typeof atomData.loading === 'undefined' 
+const isAtomEmpty = (atomData: any) =>
+  typeof atomData.loading === 'undefined' &&
+  typeof atomData.loading === 'undefined';
 
 export const GetAtom = (): AtomData => {
   const [atomData] = useAtom(atom(initialAtomData));
