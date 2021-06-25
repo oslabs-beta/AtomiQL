@@ -1,3 +1,4 @@
+import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import { atom } from 'jotai';
 import React from 'react';
@@ -14,6 +15,7 @@ import {
 interface Client {
   url: string;
   resolvers?: Resolvers;
+  typeDefs?: DocumentNode | string;
 }
 interface AtomiProviderProps {
   client: Client;
@@ -39,6 +41,7 @@ const initialCache: CacheContainer = {
     setAtom: undefined,
   }),
   writeQuery: () => ({}),
+  typeDefs: '',
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -48,8 +51,9 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
 
   constructor(props: AtomiProviderProps) {
     super(props);
-    const { client: { url, resolvers } } = this.props
+    const { client: { url, resolvers, typeDefs } } = this.props
     const graphQLClient = new GraphQLClient(url);
+    console.log(`typeDefs`, typeDefs)
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
@@ -60,6 +64,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
       resolvePathToResolvers: this.resolvePathToResolvers,
       getAtomiAtomContainer: this.getAtomiAtomContainer,
       writeQuery: this.writeQuery,
+      typeDefs: typeDefs || '',
     };
     this.cacheContainer = cacheContainer;
   }
