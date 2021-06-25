@@ -11,9 +11,12 @@ import {
   Resolvers,
 } from './types';
 
-interface MyProps {
+interface Client {
   url: string;
   resolvers?: Resolvers;
+}
+interface AtomiProviderProps {
+  client: Client;
 }
 
 const initialCache: CacheContainer = {
@@ -40,12 +43,12 @@ const initialCache: CacheContainer = {
 
 export const AtomiContext = React.createContext(initialCache);
 
-export class AtomiProvider extends React.Component<MyProps> {
+export class AtomiProvider extends React.Component<AtomiProviderProps> {
   cacheContainer: CacheContainer;
 
-  constructor(props: MyProps) {
+  constructor(props: AtomiProviderProps) {
     super(props);
-    const { url, resolvers } = this.props;
+    const { client: { url, resolvers } } = this.props
     const graphQLClient = new GraphQLClient(url);
     const cacheContainer: CacheContainer = {
       url,
