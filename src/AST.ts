@@ -75,7 +75,10 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
         pathToResolvers = updatePathToResolversOnEnter(pathToResolvers, node);
 
         const { selectionSet } = node;
+
         if (selectionSet) {
+          // Save the number of child Fields this Field has
+          // in the format { start: number-of-child-fields }
           selectionSetLengths.push({ start: selectionSet.selections.length });
           i++;
         }
@@ -92,10 +95,16 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
         }
 
         const { selectionSet } = node;
+
+        // Save the number of child Fields this Field now has after editing the AST
+        // in the format { end: number-of-child-fields }
         if (selectionSet) {
           i--;
           const selection = selectionSetLengths[i];
           selection.end = selectionSet.selections.length;
+
+          // If at the start this Field had child Fields, and now it has None
+          // Remove this Field from the Query so the Query remains valid
           if (selection.start && !selection.end) return null;
         }
       },
@@ -106,9 +115,12 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
 
   let sendQueryToServer = true;
   const rootSelectionSet = selectionSetLengths[0];
+
+  // If the root Field has no child Fields, do not send the request to the server
   if (!!rootSelectionSet && rootSelectionSet.start && !rootSelectionSet.end) {
     sendQueryToServer = false;
   }
+
   return {
     updatedAST,
     pathToResolvers,
