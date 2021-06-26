@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import React from 'react';
-import { parseQuery } from './AST';
+import { parseQuery, flattenQuery } from './AST';
 import {
   AtomData,
   AtomiAtomContainer,
@@ -8,6 +8,7 @@ import {
   PathObject,
   ReadQueryOutput,
   Resolvers,
+  ResponseData
 } from './types';
 
 interface MyProps {
@@ -21,7 +22,8 @@ const initialCache: CacheContainer = {
   readQuery: (arg1: string) => ({ data: {}, writeAtom: () => ({}) }),
   // eslint-disable-next-line no-unused-vars
   setCache: (arg1: string, arg2: AtomiAtomContainer) => ({}),
-  cache: {},
+  atomCache: {},
+  gqlNodeCache: {},
   graphQLClient: new GraphQLClient(''),
   resolvers: {},
   resolvePathToResolvers: () => ({}),
@@ -40,7 +42,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
       url,
       setCache: this.setCache,
       readQuery: this.readQuery,
-      cache: {},
+      atomCache: {},
+      gqlNodeCache: {},
       graphQLClient,
       resolvers: resolvers || {},
       resolvePathToResolvers: this.resolvePathToResolvers,
@@ -68,15 +71,27 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Store in the cache an atom container associated with a certain query
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
-    this.cacheContainer.cache = {
-      ...this.cacheContainer.cache,
+
+    this.cacheContainer.atomCache = {
+      ...this.cacheContainer.atomCache,
       [query]: atomiAtomContainer,
     };
+    
+    this.setNodeCache(atomiAtomContainer.atomData.data);
   };
+
+  // Store in a node cache data for each gql object received from the server
+  setNodeCache = (queryData: ResponseData | null) => {
+    this.cacheContainer.gqlNodeCache = {
+      ...this.cacheContainer.gqlNodeCache,
+      ...flattenQuery(queryData)
+    }
+    console.log('gqlNodeCache after flatten merge', this.cacheContainer.gqlNodeCache);
+  }
 
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
-    const atomiAtomContainer = this.cacheContainer.cache[query];
+    const atomiAtomContainer = this.cacheContainer.atomCache[query];
     // If we cannot find the atom container, throw an error
     if (!atomiAtomContainer) {
       console.error('Query not cached');

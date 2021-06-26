@@ -14,14 +14,16 @@ const initialAtomData: AtomData = {
 };
 
 const useQuery = (query: Query, input?: any): AtomDataArray => {
+  console.log('useQuery called');
+
   // Parse the graphQL query
   const { updatedAST, queryString, pathToResolvers, foundClientDirective } =
     parseQuery(query);
   // Access the cache
-  const { cache, setCache, graphQLClient, resolvePathToResolvers, resolvers } =
+  const { atomCache, setCache, graphQLClient, resolvePathToResolvers, resolvers } =
     useContext(AtomiContext);
   // Look for a cachedAtom
-  const cachedAtom = cache[queryString] ? cache[queryString].atom : null;
+  const cachedAtom = atomCache[queryString] ? atomCache[queryString].atom : null;
   // If there is no cached atom, set the active atom to be a new atom
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
   // Hooke into the activeAtom
@@ -54,6 +56,8 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
+          console.log('you did it! atom and cache set');
+          console.log('newAtomData.data', newAtomData);
         } catch {
           // Catch any errors
           newAtomData.hasError = true;

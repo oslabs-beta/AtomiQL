@@ -46,8 +46,11 @@ export interface PathObject {
 export interface CacheContainer {
   url: string;
   readQuery: (arg1: string) => ReadQueryOutput;
-  cache: {
+  atomCache: {
     [key: string]: AtomiAtomContainer;
+  };
+  gqlNodeCache: {
+    [key: string | null]: Object | null
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
