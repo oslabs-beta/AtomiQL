@@ -150,21 +150,21 @@ export const flattenQuery = (obj: ResponseData | null) => {
 
   const flattenRecursive = (queryResult: any) => {
     if (Array.isArray(queryResult)) {
-      queryResult.forEach( (result) => {
+      queryResult.forEach((result) => {
         flattenRecursive(result);
-      })
+      });
     } else {
       if (queryResult.__typename && queryResult.id) {
         const uniqueId: string = `${queryResult.__typename}-${queryResult.id}}`;
         output[uniqueId] = queryResult;
-      };
-      Object.keys(queryResult).forEach( (queryKey) => {
+      }
+      Object.keys(queryResult).forEach((queryKey) => {
         if (typeof queryResult[queryKey] === 'object') {
-          flattenRecursive(queryResult[queryKey])
+          flattenRecursive(queryResult[queryKey]);
         }
-      })
+      });
     }
-  }
+  };
   flattenRecursive(obj);
   return output;
-}
+};

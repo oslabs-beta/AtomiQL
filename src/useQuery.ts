@@ -20,10 +20,17 @@ const useQuery = (query: Query, input?: any): AtomDataArray => {
   const { updatedAST, queryString, pathToResolvers, foundClientDirective } =
     parseQuery(query);
   // Access the cache
-  const { atomCache, setCache, graphQLClient, resolvePathToResolvers, resolvers } =
-    useContext(AtomiContext);
+  const {
+    atomCache,
+    setCache,
+    graphQLClient,
+    resolvePathToResolvers,
+    resolvers,
+  } = useContext(AtomiContext);
   // Look for a cachedAtom
-  const cachedAtom = atomCache[queryString] ? atomCache[queryString].atom : null;
+  const cachedAtom = atomCache[queryString]
+    ? atomCache[queryString].atom
+    : null;
   // If there is no cached atom, set the active atom to be a new atom
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
   // Hooke into the activeAtom

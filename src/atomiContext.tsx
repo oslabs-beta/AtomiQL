@@ -10,7 +10,7 @@ import {
   PathObject,
   ReadQueryOutput,
   Resolvers,
-  ResponseData
+  ResponseData,
 } from './types';
 
 interface MyProps {
@@ -75,6 +75,7 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Store in the cache an atom container associated with a certain query
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
+<<<<<<< HEAD
     const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
 
     if (Object.keys(this.cacheContainer.atomCache).length) {
@@ -82,6 +83,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
       this.updateAtomsFromCache(flattenedQuery);
     }
 
+=======
+>>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
     this.cacheContainer.atomCache = {
       ...this.cacheContainer.atomCache,
       [query]: atomiAtomContainer,
@@ -90,15 +93,24 @@ export default class AtomiProvider extends React.Component<MyProps> {
     console.log('atomCache in setCache', this.cacheContainer.atomCache);
     console.log('atomiAtomContainer in setCache', atomiAtomContainer);
 
+<<<<<<< HEAD
+=======
+    const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
+
+    this.setQueryAtomMap(flattenedQuery, query);
+
+    this.updateAtomsFromCache(flattenedQuery);
+
+>>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
     this.setNodeCache(flattenedQuery);
 
     console.log('cachedFlatNodes in setCache', flattenedQuery);
-    console.log('queryAtomMap in setCache', this.cacheContainer.queryAtomMap)
+    console.log('queryAtomMap in setCache', this.cacheContainer.queryAtomMap);
   };
 
   // Store links between gql nodes and atoms by query key
   setQueryAtomMap = (flattenedQuery: ResponseData, query: string) => {
-    const queryAtomMap: { [key: string]: Set<string>} = {};
+    const queryAtomMap: { [key: string]: Set<string> } = {};
 
     for (const queryNode in flattenedQuery) {
       if (queryAtomMap[queryNode]) {
@@ -112,40 +124,53 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
     this.cacheContainer.queryAtomMap = {
       ...this.cacheContainer.queryAtomMap,
-      ...queryAtomMap
-    }
+      ...queryAtomMap,
+    };
   };
 
   // Store in a node cache data for each gql object received from the server
   setNodeCache = (flattenedQueryData: ResponseData | null) => {
-
     this.cacheContainer.gqlNodeCache = {
       ...this.cacheContainer.gqlNodeCache,
-      ...flattenedQueryData
-    }
-    console.log('gqlNodeCache after flatten merge', this.cacheContainer.gqlNodeCache);
-  }
+      ...flattenedQueryData,
+    };
+    console.log(
+      'gqlNodeCache after flatten merge',
+      this.cacheContainer.gqlNodeCache
+    );
+  };
 
   updateAtomsFromCache = (flattenedQuery: ResponseData) => {
-
     const atomsToUpdate: Array<string> = [];
-    Object.keys(flattenedQuery).forEach( (queryNodeId:string) => {
-      if (!isEqual(flattenedQuery[queryNodeId], this.cacheContainer.gqlNodeCache[queryNodeId])) {
+    Object.keys(flattenedQuery).forEach((queryNodeId: string) => {
+      if (
+        !isEqual(
+          flattenedQuery[queryNodeId],
+          this.cacheContainer.gqlNodeCache[queryNodeId]
+        )
+      ) {
         console.log('difference found in updateAtomsFromCache');
         atomsToUpdate.push(queryNodeId);
-      };
+      }
     });
 
     // const testObj1 = { a : [ 2, 3 ], b : [ 4 ] }
     // const testObj2 = { a : [ 4, 3 ], b : [ 4 ] }
     // console.log('deepequal test', isEqual(testObj1, testObj2))
 
+<<<<<<< HEAD
     atomsToUpdate.forEach( (queryNodeId:string) => {
       console.log('queryNodeId', queryNodeId);
       
     })
 
   }
+=======
+    atomsToUpdate.forEach((queryNodeId: string) => {
+      // this.writeAtom()
+    });
+  };
+>>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
 
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
