@@ -75,16 +75,6 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Store in the cache an atom container associated with a certain query
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
-<<<<<<< HEAD
-    const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
-
-    if (Object.keys(this.cacheContainer.atomCache).length) {
-      this.setQueryAtomMap(flattenedQuery, query);
-      this.updateAtomsFromCache(flattenedQuery);
-    }
-
-=======
->>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
     this.cacheContainer.atomCache = {
       ...this.cacheContainer.atomCache,
       [query]: atomiAtomContainer,
@@ -93,15 +83,12 @@ export default class AtomiProvider extends React.Component<MyProps> {
     console.log('atomCache in setCache', this.cacheContainer.atomCache);
     console.log('atomiAtomContainer in setCache', atomiAtomContainer);
 
-<<<<<<< HEAD
-=======
     const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
 
     this.setQueryAtomMap(flattenedQuery, query);
 
     this.updateAtomsFromCache(flattenedQuery);
 
->>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
     this.setNodeCache(flattenedQuery);
 
     console.log('cachedFlatNodes in setCache', flattenedQuery);
@@ -158,19 +145,10 @@ export default class AtomiProvider extends React.Component<MyProps> {
     // const testObj2 = { a : [ 4, 3 ], b : [ 4 ] }
     // console.log('deepequal test', isEqual(testObj1, testObj2))
 
-<<<<<<< HEAD
-    atomsToUpdate.forEach( (queryNodeId:string) => {
-      console.log('queryNodeId', queryNodeId);
-      
-    })
-
-  }
-=======
     atomsToUpdate.forEach((queryNodeId: string) => {
-      // this.writeAtom()
+      console.log('queryNodeId', queryNodeId);
     });
   };
->>>>>>> 830b5b2ce32f019e1f8fb5dd79805924c0210cd3
 
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
