@@ -75,6 +75,12 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
   // Store in the cache an atom container associated with a certain query
   setCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
+    const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
+
+    if (Object.keys(this.cacheContainer.atomCache).length) {
+      this.setQueryAtomMap(flattenedQuery, query);
+      this.updateAtomsFromCache(flattenedQuery);
+    }
 
     this.cacheContainer.atomCache = {
       ...this.cacheContainer.atomCache,
@@ -83,13 +89,6 @@ export default class AtomiProvider extends React.Component<MyProps> {
 
     console.log('atomCache in setCache', this.cacheContainer.atomCache);
     console.log('atomiAtomContainer in setCache', atomiAtomContainer);
-
-    
-    const flattenedQuery = flattenQuery(atomiAtomContainer.atomData.data);
-
-    this.setQueryAtomMap(flattenedQuery, query);
-
-    this.updateAtomsFromCache(flattenedQuery);
 
     this.setNodeCache(flattenedQuery);
 
@@ -142,7 +141,8 @@ export default class AtomiProvider extends React.Component<MyProps> {
     // console.log('deepequal test', isEqual(testObj1, testObj2))
 
     atomsToUpdate.forEach( (queryNodeId:string) => {
-      // this.writeAtom()
+      console.log('queryNodeId', queryNodeId);
+      
     })
 
   }
