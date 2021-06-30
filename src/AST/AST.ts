@@ -6,7 +6,7 @@ import {
   DirectiveNode,
   print,
 } from 'graphql';
-import { PathObject, Query } from './types';
+import { PathObject, Query } from '../types';
 
 export type Directives = readonly DirectiveNode[];
 
