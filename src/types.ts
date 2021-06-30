@@ -58,7 +58,7 @@ export interface CacheContainer {
   ) => void;
   getAtomiAtomContainer: (query: string) => AtomiAtomContainer;
   writeQuery: (query: string, newData: any) => void;
-  typeDefs: DocumentNode | string;
+  typeDefs: DocumentNode;
 }
 
 export interface ServerState {

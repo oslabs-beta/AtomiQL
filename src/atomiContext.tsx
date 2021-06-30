@@ -2,7 +2,7 @@ import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import { atom } from 'jotai';
 import React from 'react';
-import { parseQuery } from './AST/AST';
+import { getASTFromQuery, getQueryResponseType, parseQuery } from './AST/AST';
 import {
   AtomData,
   AtomiAtomContainer,
@@ -20,6 +20,8 @@ interface Client {
 interface AtomiProviderProps {
   client: Client;
 }
+
+const MOCK_TYPE_DEF = 'type Default { name: String }';
 
 const initialCache: CacheContainer = {
   url: '',
@@ -41,7 +43,7 @@ const initialCache: CacheContainer = {
     setAtom: undefined,
   }),
   writeQuery: () => ({}),
-  typeDefs: '',
+  typeDefs: getASTFromQuery(MOCK_TYPE_DEF),
 };
 
 export const AtomiContext = React.createContext(initialCache);
@@ -53,7 +55,6 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
     super(props);
     const { client: { url, resolvers, typeDefs } } = this.props
     const graphQLClient = new GraphQLClient(url);
-    console.log(`typeDefs`, typeDefs)
     const cacheContainer: CacheContainer = {
       url,
       setCache: this.setCache,
@@ -64,13 +65,22 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
       resolvePathToResolvers: this.resolvePathToResolvers,
       getAtomiAtomContainer: this.getAtomiAtomContainer,
       writeQuery: this.writeQuery,
-      typeDefs: typeDefs || '',
+      typeDefs: getASTFromQuery(typeDefs || MOCK_TYPE_DEF),
     };
     this.cacheContainer = cacheContainer;
   }
 
+  resolvePathToResolvers = (pathToResolvers: PathObject) => {
+    const { resolvers, typeDefs } = this.cacheContainer;
+    const queryName = Object.keys(pathToResolvers)[0];
+    const { name: typeName } = getQueryResponseType(typeDefs, queryName)
+    const resolverType = resolvers[typeName] as Resolvers;
+
+    this.resolvePathToResolversRecurse(pathToResolvers[queryName], resolverType)
+  }
+
   // Update the pathToResolvers object with the resolved local state
-  resolvePathToResolvers = (
+  resolvePathToResolversRecurse = (
     pathToResolvers: PathObject,
     resolvers: Resolvers
   ) => {
@@ -83,7 +93,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
         pathValue.resolveLocally = nextResolverNode();
       // Otherwise continue recursively searching the tree for Fields to resolve locally
       else if (typeof nextResolverNode === 'object')
-        this.resolvePathToResolvers(pathValue, nextResolverNode);
+        this.resolvePathToResolversRecurse(pathValue, nextResolverNode);
     }
   };
 
