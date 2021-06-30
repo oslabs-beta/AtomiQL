@@ -5,8 +5,13 @@ import {
   FieldNode,
   DirectiveNode,
   print,
+  ListTypeNode,
+  NonNullTypeNode,
+  NamedTypeNode,
+  TypeNode,
 } from 'graphql';
 import { PathObject, Query } from '../types';
+import { addFields } from './modifyFields';
 
 export type Directives = readonly DirectiveNode[];
 
@@ -149,6 +154,56 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
   }
 };
 
+export const getQueryFromSchema = (schema: DocumentNode) => {
+  return visit(schema, {
+    ObjectTypeDefinition: {
+      enter(node) {
+        if (node.name.value === 'Query') {
+          return node;
+        } else return null;
+      },
+    },
+  });
+};
+
+const typeNodeHasType = (
+  variableToCheck: any
+): variableToCheck is ListTypeNode | NonNullTypeNode =>
+  (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'ListType' ||
+  (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'NonNullType';
+
+const isNamedTypeNode = (
+  variableToCheck: any
+): variableToCheck is NamedTypeNode =>
+  (variableToCheck as NamedTypeNode).kind === 'NamedType';
+
+export const getQueryResponseType = (
+  schema: DocumentNode,
+  queryName: string
+) => {
+  const query = getQueryFromSchema(schema);
+  const output: { kinds: string[]; name: string } = { kinds: [], name: '' };
+  visit(query, {
+    FieldDefinition: {
+      enter(node) {
+        if (node.name.value === queryName) {
+          const recurseType = (node: TypeNode) => {
+            if (isNamedTypeNode(node)) {
+              output.name = node.name.value;
+            }
+            if (typeNodeHasType(node)) {
+              output.kinds.push(node.kind);
+              recurseType(node.type);
+            }
+          };
+          recurseType(node.type);
+        }
+      },
+    },
+  });
+  return output;
+};
+
 // Use this function to get a simple definition of the structure of a graphQL query
 export const getQueryStructure = (AST: DocumentNode): PathObject => {
   const queryStructure: PathObject = {};
@@ -171,7 +226,7 @@ export const getQueryStructure = (AST: DocumentNode): PathObject => {
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
-  const AST = getASTFromQuery(query);
+  const AST = addFields(getASTFromQuery(query), ['__typename']);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
   const {
