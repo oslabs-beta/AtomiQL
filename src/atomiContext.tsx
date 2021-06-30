@@ -53,7 +53,9 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
 
   constructor(props: AtomiProviderProps) {
     super(props);
-    const { client: { url, resolvers, typeDefs } } = this.props
+    const {
+      client: { url, resolvers, typeDefs },
+    } = this.props;
     const graphQLClient = new GraphQLClient(url);
     const cacheContainer: CacheContainer = {
       url,
@@ -73,11 +75,14 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
   resolvePathToResolvers = (pathToResolvers: PathObject) => {
     const { resolvers, typeDefs } = this.cacheContainer;
     const queryName = Object.keys(pathToResolvers)[0];
-    const { name: typeName } = getQueryResponseType(typeDefs, queryName)
+    const { name: typeName } = getQueryResponseType(typeDefs, queryName);
     const resolverType = resolvers[typeName] as Resolvers;
 
-    this.resolvePathToResolversRecurse(pathToResolvers[queryName], resolverType)
-  }
+    this.resolvePathToResolversRecurse(
+      pathToResolvers[queryName],
+      resolverType
+    );
+  };
 
   // Update the pathToResolvers object with the resolved local state
   resolvePathToResolversRecurse = (
