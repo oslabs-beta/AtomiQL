@@ -2,7 +2,7 @@ import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
 import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, Query, ResponseData } from './types';
-import { parseQuery } from './AST';
+import { parseQuery } from './AST/AST';
 import { mergeServerAndLocalState } from './utils';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
