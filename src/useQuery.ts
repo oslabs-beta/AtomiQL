@@ -23,11 +23,13 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   // Parse the graphQL query
   const {
     updatedAST,
-    queryString,
+    queryString: originalQuery,
     pathToResolvers,
     foundClientDirective,
     sendQueryToServer,
   } = parseQuery(query);
+  let queryString = originalQuery
+  if (input && input.variables) queryString += JSON.stringify(input.variables);
   // Access the cache
   const {
     setCache,
@@ -43,6 +45,12 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
   // Hooke into the activeAtom
   const [atomData, setAtom] = useAtom(activeAtom);
+
+  const setCacheContents = {
+    originalQuery,
+    atom: activeAtom,
+    setAtom,
+  }
 
   useEffect(() => {
     (async () => {
@@ -69,9 +77,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           newAtomData.data = result;
           // Set the response in the cache
           setCache(queryString, {
-            atom: activeAtom,
+            ...setCacheContents,
             atomData: newAtomData,
-            setAtom,
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
@@ -80,9 +87,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           newAtomData.hasError = true;
           // Set the cache
           setCache(queryString, {
-            atom: activeAtom,
+            ...setCacheContents,
             atomData: newAtomData,
-            setAtom,
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
@@ -92,9 +98,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
       if (cachedAtomContainer && !cachedAtomContainer.setAtom) {
         // Save the setAtom function so it becomes accessible
         setCache(queryString, {
-          atom: activeAtom,
+          ...setCacheContents,
           atomData,
-          setAtom,
         });
       }
       // If the query is Local and there is no cache hit
@@ -107,9 +112,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           hasError: false,
         };
         setCache(queryString, {
-          atom: activeAtom,
+          ...setCacheContents,
           atomData: newAtomData,
-          setAtom,
         });
       }
     })();
