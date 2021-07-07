@@ -73,5 +73,5 @@ export interface ServerState {
 }
 
 export interface QueryAtomMap {
-  [key: string]: Set< string >
+  [key: string]: Set<string>;
 }
