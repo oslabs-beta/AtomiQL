@@ -46,8 +46,11 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   // Hooke into the activeAtom
   const [atomData, setAtom] = useAtom(activeAtom);
 
+  const variables = input ? input.variables : undefined;
+
   const setCacheContents = {
     originalQuery,
+    variables,
     atom: activeAtom,
     setAtom,
   }
@@ -65,7 +68,6 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
-            const variables = input ? input.variables : undefined;
             result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from

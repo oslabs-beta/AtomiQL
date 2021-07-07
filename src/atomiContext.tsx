@@ -34,6 +34,8 @@ const initialCache: CacheContainer = {
       data: {},
     },
     setAtom: undefined,
+    originalQuery: '',
+    variables: {},
   }),
   writeQuery: () => ({}),
 };

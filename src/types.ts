@@ -25,7 +25,7 @@ export type AtomiAtom = Atom<AtomData> & {
 
 export interface AtomiAtomContainer {
   originalQuery: string;
-  // variables: any;
+  variables: any;
   atom: AtomiAtom;
   atomData: AtomData;
   setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>
