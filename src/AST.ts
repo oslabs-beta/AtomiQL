@@ -235,9 +235,8 @@ export const flattenQuery = (atomData: ResponseData) => {
   //   }
   // };
 
-
   flattenRecursive(atomData);
-  console.log('output of flattenQuery', output);  
+  console.log('output of flattenQuery', output);
 
   // if (Object.keys(output).length) {
   //   Object.keys(output).forEach( (queryId: string) => {

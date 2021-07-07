@@ -26,7 +26,7 @@ export type AtomiAtom = Atom<AtomData> & {
 export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
-  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>
+  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>;
 }
 
 export interface ReadQueryOutput {
@@ -71,5 +71,5 @@ export interface ServerState {
 }
 
 export interface QueryAtomMap {
-  [key: string]: Set< string >
+  [key: string]: Set<string>;
 }
