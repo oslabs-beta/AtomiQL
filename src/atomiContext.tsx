@@ -226,6 +226,8 @@ export class AtomiProvider extends React.Component<MyProps> {
     //   this.writeAtom(this.getAtomiAtomContainer(query), )
 
     // });
+
+    
   };
 
   reQuery = (query: string) => {};
@@ -241,12 +243,7 @@ export class AtomiProvider extends React.Component<MyProps> {
     !!this.cacheContainer.atomCache[query];
 
   // Update the value of the atoms associated with a certain query
-<<<<<<< HEAD
-  writeQuery = (queryInput: string, newData: any) => {
-    console.log('newData in writeQuery', newData);
-=======
   writeQuery = (queryInput: string, newData: any, variables?: any) => {
->>>>>>> 181d584d3fbb5fb4a1caff7f16ef98ddac5c994e
     const { queryString: query } = parseQuery(queryInput);
     // Get the atom container associated with the query
     let atomiAtomContainer = this.getAtomiAtomContainer(query);
