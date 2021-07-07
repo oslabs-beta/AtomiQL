@@ -28,7 +28,7 @@ export interface AtomiAtomContainer {
   variables: any;
   atom: AtomiAtom;
   atomData: AtomData;
-  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>
+  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>;
 }
 
 export interface ReadQueryOutput {
