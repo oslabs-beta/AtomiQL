@@ -28,7 +28,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
     foundClientDirective,
     sendQueryToServer,
   } = parseQuery(query);
-  let queryString = originalQuery
+  let queryString = originalQuery;
   if (input && input.variables) queryString += JSON.stringify(input.variables);
   // Access the cache
   const {
@@ -50,7 +50,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
     originalQuery,
     atom: activeAtom,
     setAtom,
-  }
+  };
 
   useEffect(() => {
     (async () => {
