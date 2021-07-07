@@ -226,8 +226,6 @@ export class AtomiProvider extends React.Component<MyProps> {
     //   this.writeAtom(this.getAtomiAtomContainer(query), )
 
     // });
-
-    
   };
 
   reQuery = (query: string) => {};
