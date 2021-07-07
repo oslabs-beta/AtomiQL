@@ -20,13 +20,13 @@ export interface AtomData {
 
 export type AtomiAtom = Atom<AtomData> & {
   write: Write<SetStateAction<AtomData>>;
-  onMount?: OnMount<SetStateAction<AtomData>> | undefined;
+  onMount?: OnMount<SetStateAction<AtomData>>;
 } & WithInitialValue<AtomData>;
 
 export interface AtomiAtomContainer {
   atom: AtomiAtom;
   atomData: AtomData;
-  setAtom: (update: SetStateAction<AtomData>) => void | Promise<void>;
+  setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>
 }
 
 export interface ReadQueryOutput {
@@ -53,7 +53,7 @@ export interface CacheContainer {
     [key: string | null]: Object | null;
   };
   queryAtomMap: {
-    [key: string | null]: string | Set<string>;
+    [key: string | null]: Set<Object>;
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
@@ -62,8 +62,14 @@ export interface CacheContainer {
     pathToResolvers: PathObject,
     resolvers: Resolvers
   ) => void;
+  getAtomiAtomContainer: (query: string) => AtomiAtomContainer;
+  writeQuery: (query: string, newData: any) => void;
 }
 
 export interface ServerState {
   [key: string]: ServerState;
+}
+
+export interface QueryAtomMap {
+  [key: string]: Set< string >
 }

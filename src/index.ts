@@ -1,4 +1,4 @@
-import AtomiProvider from './atomiContext';
+import { AtomiProvider, AtomiContext } from './atomiContext';
 import useQuery from './useQuery';
 import useMutation from './useMutation';
 import {
@@ -13,6 +13,7 @@ import {
 
 export {
   AtomiProvider,
+  AtomiContext,
   useQuery,
   useMutation,
   ResponseData,

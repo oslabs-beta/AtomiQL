@@ -3,7 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { gql } from 'graphql-request';
 import useQuery, { GetAtom } from '../useQuery';
-import AtomiProvider, { AtomiContext } from '../atomiContext';
+import { AtomiProvider, AtomiContext } from '../atomiContext';
 
 describe('AtomiContext', () => {
   afterEach(() => {

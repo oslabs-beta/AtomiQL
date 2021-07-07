@@ -8,18 +8,20 @@ import {
 } from 'graphql';
 import { PathObject, Query, ResponseData } from './types';
 
-export type Directives = readonly DirectiveNode[] | undefined;
+export type Directives = readonly DirectiveNode[];
 
 export interface UpdatedASTResponse {
   updatedAST: DocumentNode;
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
+  sendQueryToServer: boolean;
 }
 export interface ParseQueryResponse {
   updatedAST: DocumentNode;
   queryString: string;
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
+  sendQueryToServer: boolean;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -28,11 +30,11 @@ export const getASTFromQuery = (query: Query): DocumentNode =>
 const nodeHasDirectives = (node: FieldNode): boolean =>
   !!node.directives && node.directives.length > 0;
 
-const directiveIsType = (directives: Directives, type: string) =>
+const directiveIsType = (type: string, directives?: Directives) =>
   !!directives && directives[0].name.value === type;
 
 const nodeHasClientDirective = (node: FieldNode) =>
-  nodeHasDirectives(node) && directiveIsType(node.directives, 'client');
+  nodeHasDirectives(node) && directiveIsType('client', node.directives);
 
 const updatePathToResolversOnEnter = (
   pathToResolvers: PathObject,
@@ -64,11 +66,22 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
 ): UpdatedASTResponse => {
   let foundClientDirective = false;
   let pathToResolvers: PathObject = {};
+  const selectionSetLengths: { end?: number; start?: number }[] = [];
+  let i = 0;
   const updatedAST = visit(AST, {
     Field: {
       enter(node: FieldNode) {
         // Track in pathToResolvers each Field in the query and move  it one level deeper
         pathToResolvers = updatePathToResolversOnEnter(pathToResolvers, node);
+
+        const { selectionSet } = node;
+
+        if (selectionSet) {
+          // Save the number of child Fields this Field has
+          // in the format { start: number-of-child-fields }
+          selectionSetLengths.push({ start: selectionSet.selections.length });
+          i++;
+        }
       },
       leave(node: FieldNode) {
         // Update and move pathResolver back up one level towards its root
@@ -80,14 +93,40 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
           // Returning null removes this field from the AST
           return null;
         }
+
+        const { selectionSet } = node;
+
+        // Save the number of child Fields this Field now has after editing the AST
+        // in the format { end: number-of-child-fields }
+        if (selectionSet) {
+          i--;
+          const selection = selectionSetLengths[i];
+          selection.end = selectionSet.selections.length;
+
+          // If at the start this Field had child Fields, and now it has None
+          // Remove this Field from the Query so the Query remains valid
+          if (selection.start && !selection.end) return null;
+        }
       },
     },
   });
-
   // If @client directive found remove the links from each node to its parent in pathToResolvers
   if (foundClientDirective) removeParentFieldsFromTree(pathToResolvers);
 
-  return { updatedAST, pathToResolvers, foundClientDirective };
+  let sendQueryToServer = true;
+  const rootSelectionSet = selectionSetLengths[0];
+
+  // If the root Field has no child Fields, do not send the request to the server
+  if (!!rootSelectionSet && rootSelectionSet.start && !rootSelectionSet.end) {
+    sendQueryToServer = false;
+  }
+
+  return {
+    updatedAST,
+    pathToResolvers,
+    foundClientDirective,
+    sendQueryToServer,
+  };
 };
 
 // removeParentFieldsFromTree removes all key -> child pairs with the key name 'parent' from a tree
@@ -135,27 +174,35 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
   const AST = getASTFromQuery(query);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
-  const { updatedAST, pathToResolvers, foundClientDirective } =
-    removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
+  const {
+    updatedAST,
+    pathToResolvers,
+    foundClientDirective,
+    sendQueryToServer,
+  } = removeFieldsWithClientDirectiveAndCreatePathToResolvers(AST);
   return {
     updatedAST,
     pathToResolvers,
     queryString: print(AST),
     foundClientDirective,
+    sendQueryToServer,
   };
 };
 
-export const flattenQuery = (obj: ResponseData | null) => {
+export const flattenQuery = (atomData: ResponseData) => {
   const output: ResponseData = {};
 
+  // console.log('obj in flattenQuery', obj);
+
   const flattenRecursive = (queryResult: any) => {
+    // console.log('queryResult in flattenRecursive', queryResult);
     if (Array.isArray(queryResult)) {
       queryResult.forEach((result) => {
         flattenRecursive(result);
       });
     } else {
       if (queryResult.__typename && queryResult.id) {
-        const uniqueId: string = `${queryResult.__typename}-${queryResult.id}}`;
+        const uniqueId: string = `${queryResult.__typename}-${queryResult.id}`;
         output[uniqueId] = queryResult;
       }
       Object.keys(queryResult).forEach((queryKey) => {
@@ -165,6 +212,40 @@ export const flattenQuery = (obj: ResponseData | null) => {
       });
     }
   };
-  flattenRecursive(obj);
+
+  // const addLinkRecursive = (queryId: string, queryResult: any) => {
+  //   console.log('queryId in addLink', queryId);
+  //   console.log('queryResult in addLinkRecursive', queryResult);
+  //   console.log('output in addLink', output);
+  //   if (Array.isArray(queryResult)) {
+  //     queryResult.forEach((result) => {
+  //       addLinkRecursive(queryId, result);
+  //     });
+  //   } else {
+  //     if (`${queryResult.__typename}-${queryResult.id}` === queryId) {
+  //       console.log('reached setlink case in addLink', queryResult);
+  //       output[queryId].link = queryResult;
+  //     }
+  //     Object.keys(queryResult).forEach((queryKey) => {
+  //       if (typeof queryResult[queryKey] === 'object' && queryKey !== 'link') {
+  //         console.log('queryKey');
+  //         addLinkRecursive(queryId, queryResult[queryKey]);
+  //       }
+  //     });
+  //   }
+  // };
+
+
+  flattenRecursive(atomData);
+  console.log('output of flattenQuery', output);  
+
+  // if (Object.keys(output).length) {
+  //   Object.keys(output).forEach( (queryId: string) => {
+  //     console.log('');
+  //     addLinkRecursive(queryId, atomData)
+  //   })
+  // }
+
+  // console.log('output of addLinkRecursive', output);
   return output;
 };
