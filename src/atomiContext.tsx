@@ -34,6 +34,8 @@ const initialCache: CacheContainer = {
       data: {},
     },
     setAtom: undefined,
+    originalQuery: '',
+    variables: {},
   }),
   writeQuery: () => ({}),
 };
@@ -98,7 +100,7 @@ export class AtomiProvider extends React.Component<MyProps> {
     !!this.cacheContainer.cache[query];
 
   // Update the value of the atoms associated with a certain query
-  writeQuery = (queryInput: string, newData: any) => {
+  writeQuery = (queryInput: string, newData: any, variables?: any) => {
     const { queryString: query } = parseQuery(queryInput);
     // Get the atom container associated with the query
     let atomiAtomContainer = this.getAtomiAtomContainer(query);
@@ -116,6 +118,8 @@ export class AtomiProvider extends React.Component<MyProps> {
       };
       // AtomContainer not cached, so create it.
       atomiAtomContainer = {
+        originalQuery: queryInput,
+        variables,
         atom: atom(newAtomData),
         atomData: {
           loading: false,
