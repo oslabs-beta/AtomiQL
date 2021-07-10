@@ -4,6 +4,7 @@ import { AtomiContext } from './atomiContext';
 import { AtomData, AtomiAtom, Query, ResponseData } from './types';
 import { parseQuery } from './AST/AST';
 import { mergeServerAndLocalState } from './utils';
+import { resolveQueryWithLocalFields } from './AST/LocalResolution/resolveQueryWithLocalFields';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -23,6 +24,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   // Parse the graphQL query
   const {
     updatedAST,
+    strippedQuery,
     queryString,
     pathToResolvers,
     foundClientDirective,
@@ -35,6 +37,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
     resolvePathToResolvers,
     resolvers,
     getAtomiAtomContainer,
+    typeDefs
   } = useContext(AtomiContext);
   // Look for a cachedAtomContainer
   const cachedAtomContainer = getAtomiAtomContainer(queryString);
@@ -57,14 +60,18 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
+            console.log(`updatedAST`, updatedAST)
             const variables = input ? input.variables : undefined;
             result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from
           // the server with local state from the resolvers for those Fields
           if (foundClientDirective) {
-            resolvePathToResolvers(pathToResolvers, resolvers);
-            mergeServerAndLocalState(result, pathToResolvers);
+            console.log(`result before`, result)
+            // resolvePathToResolvers(pathToResolvers, resolvers);
+            // mergeServerAndLocalState(result, pathToResolvers);
+            result = await resolveQueryWithLocalFields(typeDefs, resolvers, pathToResolvers, result, strippedQuery)
+            console.log(`result`, result)
           }
           newAtomData.data = result;
           // Set the response in the cache
