@@ -224,6 +224,11 @@ export class AtomiProvider extends React.Component<MyProps> {
       this.reQuery(atomQuery);
     });
     
+    // atomsToUpdate.forEach((atomQuery: string) => {
+    //   console.log('atomQuery', atomQuery);
+    //   this.writeAtom(this.getAtomiAtomContainer(query), )
+
+    // });
   };
 
   reQuery = async (query: string) => {
