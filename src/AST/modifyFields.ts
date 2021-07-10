@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 /* eslint-disable import/prefer-default-export */
 
 import {
@@ -18,10 +20,10 @@ export function addFields(
   return visit(query, {
     SelectionSet: {
       leave(
-        node: SelectionSetNode,
-        _key: string,
-        _parent: ASTNode,
-        _path: ReadonlyArray<string | number>
+        node: SelectionSetNode
+        // _key: string,
+        // _parent: ASTNode,
+        // _path: ReadonlyArray<string | number>
       ): {} | undefined {
         // @return
         //   undefined: no action
@@ -58,10 +60,16 @@ export function addFields(
 function hasField(
   name: string
 ): (selectionSet: ReadonlyArray<SelectionNode>) => boolean {
+  type Some = (
+    value: SelectionNode,
+    index: number,
+    array: SelectionNode[]
+  ) => unknown;
+  const some = ({ name: { value } }: FieldNode) => value === name;
+  const someFunc = some as Some;
+
   return (selectionSet) =>
-    selectionSet
-      .filter((s) => s.kind === 'Field')
-      .some(({ name: { value } }: FieldNode) => value === name);
+    selectionSet.filter((s) => s.kind === 'Field').some(someFunc);
 }
 
 function createField(name: string): FieldNode {
@@ -81,13 +89,13 @@ function createField(name: string): FieldNode {
 
 export function removeFields(
   query: DocumentNode,
-  fieldstoRemove: ReadonlyArray<string>
+  fieldsToRemove: ReadonlyArray<string>
 ): DocumentNode {
   return visit(query, {
     // tslint:disable-next-line:function-name
     Field: {
       enter(node: any) {
-        return fieldstoRemove.indexOf(node.name.value) > -1 ? null : undefined;
+        return fieldsToRemove.indexOf(node.name.value) > -1 ? null : undefined;
       },
     },
   });
