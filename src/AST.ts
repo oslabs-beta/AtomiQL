@@ -80,7 +80,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
           // Save the number of child Fields this Field has
           // in the format { start: number-of-child-fields }
           selectionSetLengths.push({ start: selectionSet.selections.length });
-          i++;
+          i += 1;
         }
       },
       leave(node: FieldNode) {
@@ -99,7 +99,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
         // Save the number of child Fields this Field now has after editing the AST
         // in the format { end: number-of-child-fields }
         if (selectionSet) {
-          i--;
+          i -= 1;
           const selection = selectionSetLengths[i];
           selection.end = selectionSet.selections.length;
 
