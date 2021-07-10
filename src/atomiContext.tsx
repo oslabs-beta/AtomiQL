@@ -121,7 +121,6 @@ export class AtomiProvider extends React.Component<MyProps> {
     // this.setNodeCache(flattenedQuery);
 
     if (Object.keys(this.cacheContainer.atomCache).length) {
-      
       this.updateAtomsFromCache(query, atomiAtomContainer, flattenedQuery);
     }
 
@@ -149,8 +148,10 @@ export class AtomiProvider extends React.Component<MyProps> {
       }
     }
 
-    console.log('queryAtomMap in setQueryAtomMap', this.cacheContainer.queryAtomMap);
-
+    console.log(
+      'queryAtomMap in setQueryAtomMap',
+      this.cacheContainer.queryAtomMap
+    );
   };
 
   setAtomCache = (query: string, atomiAtomContainer: AtomiAtomContainer) => {
@@ -185,10 +186,13 @@ export class AtomiProvider extends React.Component<MyProps> {
         'this.cacheContainer.gqlNodeCache',
         this.cacheContainer.gqlNodeCache
       );
-      console.log('isEqual', isEqual(
-        flattenedQuery[queryNodeId],
-        this.cacheContainer.gqlNodeCache[queryNodeId]
-      ))
+      console.log(
+        'isEqual',
+        isEqual(
+          flattenedQuery[queryNodeId],
+          this.cacheContainer.gqlNodeCache[queryNodeId]
+        )
+      );
       if (
         // leave out bang operator next to isEqual for  testing
         !isEqual(
@@ -205,7 +209,7 @@ export class AtomiProvider extends React.Component<MyProps> {
           console.log('atomString', atomString);
           // console.log('typeof atomString', typeof atomString);
           // if(atomString !== query)
-          if(atomString !== query) atomsToUpdate.add(atomString);
+          if (atomString !== query) atomsToUpdate.add(atomString);
         });
       }
     });
@@ -223,7 +227,7 @@ export class AtomiProvider extends React.Component<MyProps> {
       console.log('reQuery called on each atomToUpdate', atomQuery);
       this.reQuery(atomQuery);
     });
-    
+
     // atomsToUpdate.forEach((atomQuery: string) => {
     //   console.log('atomQuery', atomQuery);
     //   this.writeAtom(this.getAtomiAtomContainer(query), )
@@ -232,19 +236,19 @@ export class AtomiProvider extends React.Component<MyProps> {
   };
 
   reQuery = async (query: string) => {
-    console.log('inside reQuery, query = ', query)
-    console.log('cacheContainer in reQuery', this.cacheContainer); 
+    console.log('inside reQuery, query = ', query);
+    console.log('cacheContainer in reQuery', this.cacheContainer);
     // console.log('atomContainer in reQuery', this.cacheContainer.atomCache);
     const { graphQLClient } = this.cacheContainer;
     if (this.cacheContainer.atomCache[query]) {
       const atomiAtomContainer = this.cacheContainer.atomCache[query];
-      console.log('atomiAtomContainer in reQuery', atomiAtomContainer)
-      const {originalQuery, variables } = atomiAtomContainer;
+      console.log('atomiAtomContainer in reQuery', atomiAtomContainer);
+      const { originalQuery, variables } = atomiAtomContainer;
       const res = await graphQLClient.request(originalQuery, variables);
       console.log('res in reQuery', res);
-      this.writeAtom(atomiAtomContainer, res)
+      this.writeAtom(atomiAtomContainer, res);
     }
- };
+  };
 
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
