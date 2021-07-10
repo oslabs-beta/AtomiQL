@@ -192,7 +192,7 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
 export const flattenQuery = (atomData: ResponseData) => {
   const output: ResponseData = {};
 
-  // console.log('obj in flattenQuery', obj);
+  // console.log('obj in flattenQuery', atomData);
 
   const flattenRecursive = (queryResult: any) => {
     // console.log('queryResult in flattenRecursive', queryResult);
