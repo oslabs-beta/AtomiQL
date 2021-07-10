@@ -52,10 +52,10 @@ export interface CacheContainer {
     [key: string]: AtomiAtomContainer;
   };
   gqlNodeCache: {
-    [key: string | null]: Object | null;
+    [key: string]: Object | null;
   };
   queryAtomMap: {
-    [key: string | null]: Set<Object>;
+    [key: string]: Set<string>;
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;
@@ -70,8 +70,4 @@ export interface CacheContainer {
 
 export interface ServerState {
   [key: string]: ServerState;
-}
-
-export interface QueryAtomMap {
-  [key: string]: Set<string>;
 }

@@ -19,7 +19,6 @@ interface UseQueryInput {
 }
 
 const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
-  console.log('usequery called', query);
   const isLocal = input && input.isLocal;
   // Parse the graphQL query
   const {
@@ -69,7 +68,6 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
-            console.log('request sent in useQuery');
             result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from
@@ -86,8 +84,6 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
-          console.log('you did it! atom and cache set');
-          console.log('newAtomData.data', newAtomData);
         } catch {
           // Catch any errors
           newAtomData.hasError = true;

@@ -192,10 +192,7 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
 export const flattenQuery = (atomData: ResponseData) => {
   const output: ResponseData = {};
 
-  // console.log('obj in flattenQuery', atomData);
-
   const flattenRecursive = (queryResult: any) => {
-    // console.log('queryResult in flattenRecursive', queryResult);
     if (Array.isArray(queryResult)) {
       queryResult.forEach((result) => {
         flattenRecursive(result);
@@ -212,39 +209,9 @@ export const flattenQuery = (atomData: ResponseData) => {
       });
     }
   };
-
-  // const addLinkRecursive = (queryId: string, queryResult: any) => {
-  //   console.log('queryId in addLink', queryId);
-  //   console.log('queryResult in addLinkRecursive', queryResult);
-  //   console.log('output in addLink', output);
-  //   if (Array.isArray(queryResult)) {
-  //     queryResult.forEach((result) => {
-  //       addLinkRecursive(queryId, result);
-  //     });
-  //   } else {
-  //     if (`${queryResult.__typename}-${queryResult.id}` === queryId) {
-  //       console.log('reached setlink case in addLink', queryResult);
-  //       output[queryId].link = queryResult;
-  //     }
-  //     Object.keys(queryResult).forEach((queryKey) => {
-  //       if (typeof queryResult[queryKey] === 'object' && queryKey !== 'link') {
-  //         console.log('queryKey');
-  //         addLinkRecursive(queryId, queryResult[queryKey]);
-  //       }
-  //     });
-  //   }
-  // };
-
+  
   flattenRecursive(atomData);
   console.log('output of flattenQuery', output);
 
-  // if (Object.keys(output).length) {
-  //   Object.keys(output).forEach( (queryId: string) => {
-  //     console.log('');
-  //     addLinkRecursive(queryId, atomData)
-  //   })
-  // }
-
-  // console.log('output of addLinkRecursive', output);
   return output;
 };
