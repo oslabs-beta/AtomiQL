@@ -209,7 +209,7 @@ export const flattenQuery = (atomData: ResponseData) => {
       });
     }
   };
-  
+
   flattenRecursive(atomData);
   console.log('output of flattenQuery', output);
 

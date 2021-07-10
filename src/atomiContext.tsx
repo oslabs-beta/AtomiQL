@@ -108,7 +108,7 @@ export class AtomiProvider extends React.Component<MyProps> {
 
     // sets the cache in the atom
     this.setAtomCache(query, atomiAtomContainer);
-    
+
     // sets the flattened cache
     this.setNodeCache(flattenedQuery);
   };
@@ -140,11 +140,8 @@ export class AtomiProvider extends React.Component<MyProps> {
     };
   };
 
-  // iterates through the existing flattened node cache, performs a deep equality scan to check if any differences exist in any object, returns a list of atoms with differences, then calls requery on them 
-  updateAtomsFromCache = (
-    query: string,
-    flattenedQuery: ResponseData
-  ) => {
+  // iterates through the existing flattened node cache, performs a deep equality scan to check if any differences exist in any object, returns a list of atoms with differences, then calls requery on them
+  updateAtomsFromCache = (query: string, flattenedQuery: ResponseData) => {
     const atomsToUpdate: Set<string> = new Set();
     Object.keys(flattenedQuery).forEach((queryNodeId: string) => {
       if (
@@ -154,7 +151,7 @@ export class AtomiProvider extends React.Component<MyProps> {
         )
       ) {
         this.cacheContainer.queryAtomMap[queryNodeId].forEach((atomString) => {
-          if(atomString !== query) atomsToUpdate.add(atomString);
+          if (atomString !== query) atomsToUpdate.add(atomString);
         });
       }
     });
@@ -169,9 +166,9 @@ export class AtomiProvider extends React.Component<MyProps> {
     const { graphQLClient } = this.cacheContainer;
     if (this.cacheContainer.atomCache[query]) {
       const atomiAtomContainer = this.cacheContainer.atomCache[query];
-      const {originalQuery, variables } = atomiAtomContainer;
+      const { originalQuery, variables } = atomiAtomContainer;
       const res = await graphQLClient.request(originalQuery, variables);
-      this.writeAtom(atomiAtomContainer, res)
+      this.writeAtom(atomiAtomContainer, res);
     }
   };
 
