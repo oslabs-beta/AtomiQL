@@ -27,6 +27,7 @@ export interface ParseQueryResponse {
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
   sendQueryToServer: boolean;
+  strippedQuery: string;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -204,9 +205,24 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
 //   return output;
 // };
 
+export const stripClientDirectivesFromQuery = (query: Query): string => {
+  const queryAST = getASTFromQuery(query);
+
+  const strippedQuery = visit(queryAST, {
+    Directive: {
+      leave(node) {
+        if (node.name.value === 'client') return null;
+      }
+    }
+  });
+  return print(strippedQuery);
+}
+
+
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
   const AST = addFields(getASTFromQuery(query), ['__typename']);
+  const strippedQuery = stripClientDirectivesFromQuery(AST);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
   const {
@@ -221,5 +237,6 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
     queryString: print(AST),
     foundClientDirective,
     sendQueryToServer,
+    strippedQuery,
   };
 };
