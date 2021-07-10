@@ -173,7 +173,7 @@ export class AtomiProvider extends React.Component<MyProps> {
       const res = await graphQLClient.request(originalQuery, variables);
       this.writeAtom(atomiAtomContainer, res)
     }
- };
+  };
 
   // Get the atom container for a certain query
   getAtomiAtomContainer = (query: string): AtomiAtomContainer => {
