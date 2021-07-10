@@ -154,7 +154,7 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
   }
 };
 
-export const getQueryFromSchema = (schema: DocumentNode) => {
+const getQueryFromSchema = (schema: DocumentNode) => {
   return visit(schema, {
     ObjectTypeDefinition: {
       enter(node) {
@@ -205,7 +205,7 @@ export const getQueryResponseType = (
 };
 
 // Use this function to get a simple definition of the structure of a graphQL query
-export const getQueryStructure = (AST: DocumentNode): PathObject => {
+const getQueryStructure = (AST: DocumentNode): PathObject => {
   const queryStructure: PathObject = {};
   let pathToResolvers = queryStructure;
   visit(AST, {
