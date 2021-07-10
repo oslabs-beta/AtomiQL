@@ -72,20 +72,20 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
     this.cacheContainer = cacheContainer;
   }
 
-  resolvePathToResolvers = (pathToResolvers: PathObject) => {
-    const { resolvers, typeDefs } = this.cacheContainer;
-    const queryName = Object.keys(pathToResolvers)[0];
-    const { name: typeName } = getQueryResponseType(typeDefs, queryName);
-    const resolverType = resolvers[typeName] as Resolvers;
+  // resolvePathToResolvers = (pathToResolvers: PathObject) => {
+  //   const { resolvers, typeDefs } = this.cacheContainer;
+  //   const queryName = Object.keys(pathToResolvers)[0];
+  //   const { name: typeName } = getQueryResponseType(typeDefs, queryName);
+  //   const resolverType = resolvers[typeName] as Resolvers;
 
-    this.resolvePathToResolversRecurse(
-      pathToResolvers[queryName],
-      resolverType
-    );
-  };
+  //   this.resolvePathToResolversRecurse(
+  //     pathToResolvers[queryName],
+  //     resolverType
+  //   );
+  // };
 
   // Update the pathToResolvers object with the resolved local state
-  resolvePathToResolversRecurse = (
+  resolvePathToResolvers = (
     pathToResolvers: PathObject,
     resolvers: Resolvers
   ) => {
@@ -98,7 +98,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
         pathValue.resolveLocally = nextResolverNode();
       // Otherwise continue recursively searching the tree for Fields to resolve locally
       else if (typeof nextResolverNode === 'object')
-        this.resolvePathToResolversRecurse(pathValue, nextResolverNode);
+        this.resolvePathToResolvers(pathValue, nextResolverNode);
     }
   };
 

@@ -154,75 +154,55 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
   }
 };
 
-const getQueryFromSchema = (schema: DocumentNode) => {
-  return visit(schema, {
-    ObjectTypeDefinition: {
-      enter(node) {
-        if (node.name.value === 'Query') {
-          return node;
-        } else return null;
-      },
-    },
-  });
-};
+// const getQueryFromSchema = (schema: DocumentNode) => {
+//   return visit(schema, {
+//     ObjectTypeDefinition: {
+//       enter(node) {
+//         if (node.name.value === 'Query') {
+//           return node;
+//         } else return null;
+//       },
+//     },
+//   });
+// };
 
-const typeNodeHasType = (
-  variableToCheck: any
-): variableToCheck is ListTypeNode | NonNullTypeNode =>
-  (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'ListType' ||
-  (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'NonNullType';
+// const typeNodeHasType = (
+//   variableToCheck: any
+// ): variableToCheck is ListTypeNode | NonNullTypeNode =>
+//   (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'ListType' ||
+//   (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'NonNullType';
 
-const isNamedTypeNode = (
-  variableToCheck: any
-): variableToCheck is NamedTypeNode =>
-  (variableToCheck as NamedTypeNode).kind === 'NamedType';
+// const isNamedTypeNode = (
+//   variableToCheck: any
+// ): variableToCheck is NamedTypeNode =>
+//   (variableToCheck as NamedTypeNode).kind === 'NamedType';
 
-export const getQueryResponseType = (
-  schema: DocumentNode,
-  queryName: string
-) => {
-  const query = getQueryFromSchema(schema);
-  const output: { kinds: string[]; name: string } = { kinds: [], name: '' };
-  visit(query, {
-    FieldDefinition: {
-      enter(node) {
-        if (node.name.value === queryName) {
-          const recurseType = (node: TypeNode) => {
-            if (isNamedTypeNode(node)) {
-              output.name = node.name.value;
-            }
-            if (typeNodeHasType(node)) {
-              output.kinds.push(node.kind);
-              recurseType(node.type);
-            }
-          };
-          recurseType(node.type);
-        }
-      },
-    },
-  });
-  return output;
-};
-
-// Use this function to get a simple definition of the structure of a graphQL query
-const getQueryStructure = (AST: DocumentNode): PathObject => {
-  const queryStructure: PathObject = {};
-  let pathToResolvers = queryStructure;
-  visit(AST, {
-    Field: {
-      enter(node) {
-        const name: string = node.name.value;
-        pathToResolvers[name] = {};
-        pathToResolvers[name].parent = pathToResolvers;
-        pathToResolvers = pathToResolvers[name];
-      },
-      leave() {
-        pathToResolvers = pathToResolvers.parent;
-      },
-    },
-  });
-  return queryStructure;
-};
+// export const getQueryResponseType = (
+//   schema: DocumentNode,
+//   queryName: string
+// ) => {
+//   const query = getQueryFromSchema(schema);
+//   const output: { kinds: string[]; name: string } = { kinds: [], name: '' };
+//   visit(query, {
+//     FieldDefinition: {
+//       enter(node) {
+//         if (node.name.value === queryName) {
+//           const recurseType = (node: TypeNode) => {
+//             if (isNamedTypeNode(node)) {
+//               output.name = node.name.value;
+//             }
+//             if (typeNodeHasType(node)) {
+//               output.kinds.push(node.kind);
+//               recurseType(node.type);
+//             }
+//           };
+//           recurseType(node.type);
+//         }
+//       },
+//     },
+//   });
+//   return output;
+// };
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
