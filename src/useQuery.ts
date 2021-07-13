@@ -37,7 +37,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
     resolvePathToResolvers,
     resolvers,
     getAtomiAtomContainer,
-    typeDefs
+    typeDefs,
   } = useContext(AtomiContext);
   // Look for a cachedAtomContainer
   const cachedAtomContainer = getAtomiAtomContainer(queryString);
@@ -60,18 +60,24 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           let result = {};
           // Query the server if Query is valid
           if (sendQueryToServer) {
-            console.log(`updatedAST`, updatedAST)
+            console.log(`updatedAST`, updatedAST);
             const variables = input ? input.variables : undefined;
             result = await graphQLClient.request(updatedAST, variables);
           }
           // If there are @client directives in the query, merge the result from
           // the server with local state from the resolvers for those Fields
           if (foundClientDirective) {
-            console.log(`result before`, result)
+            console.log(`result before`, result);
             // resolvePathToResolvers(pathToResolvers, resolvers);
             // mergeServerAndLocalState(result, pathToResolvers);
-            result = await resolveQueryWithLocalFields(typeDefs, resolvers, pathToResolvers, result, strippedQuery)
-            console.log(`result`, result)
+            result = await resolveQueryWithLocalFields(
+              typeDefs,
+              resolvers,
+              pathToResolvers,
+              result,
+              strippedQuery
+            );
+            console.log(`result`, result);
           }
           newAtomData.data = result;
           // Set the response in the cache

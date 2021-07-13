@@ -9,7 +9,7 @@ const getTypeDefinitionObj = (type: any, executableSchema: any) => {
   const typeDefinition = executableSchema._typeMap[type];
   // Handle Enums
   if (typeDefinition.astNode) {
-    if (typeDefinition.astNode.kind === "EnumTypeDefinition") {
+    if (typeDefinition.astNode.kind === 'EnumTypeDefinition') {
       output[type] = Object.keys(typeDefinition._nameLookup);
       return output;
     }
@@ -52,4 +52,3 @@ export const getTypeMapObj = (executableSchema) => {
   });
   return output;
 };
-

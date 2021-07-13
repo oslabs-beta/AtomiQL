@@ -1,13 +1,13 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { graphql, visit, parse, print } from 'graphql'
+import { graphql, visit, parse, print } from 'graphql';
 
-const { getTypeMapObj } = require("./getTypeMapObj");
+const { getTypeMapObj } = require('./getTypeMapObj');
 
 const getQueryField = (executableSchema, queryName) =>
   executableSchema._queryType._fields[queryName];
 
-const isNamedTypeNode = (node) => node.kind === "NamedType";
+const isNamedTypeNode = (node) => node.kind === 'NamedType';
 const typeNodeHasType = (node) => !!node.type;
 
 const getQueryResponseTypeCustomObj = (executableSchema, queryName) => {
@@ -142,7 +142,7 @@ export const resolveQueryWithLocalFields = async (
     typeDefs,
     resolvers,
   });
-  console.log(`executableSchema`, executableSchema)
+  console.log(`executableSchema`, executableSchema);
   const newExecutableSchema = createLocalExecutableSchema(
     typeDefs,
     resolvers,
@@ -150,6 +150,6 @@ export const resolveQueryWithLocalFields = async (
     executableSchema,
     serverResponse
   );
-  console.log(`newExecutableSchema`, newExecutableSchema)
+  console.log(`newExecutableSchema`, newExecutableSchema);
   return (await graphql(newExecutableSchema, query)).data;
 };
