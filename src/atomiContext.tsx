@@ -187,7 +187,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
         foundClientDirective,
         sendQueryToServer,
       } = parseQuery(originalQuery);
-      const res = getQueryResult(
+      const res = await getQueryResult(
         sendQueryToServer,
         graphQLClient,
         updatedAST,
