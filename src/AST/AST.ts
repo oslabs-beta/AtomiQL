@@ -212,12 +212,11 @@ export const stripClientDirectivesFromQuery = (query: Query): string => {
     Directive: {
       leave(node) {
         if (node.name.value === 'client') return null;
-      }
-    }
+      },
+    },
   });
   return print(strippedQuery);
-}
-
+};
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
