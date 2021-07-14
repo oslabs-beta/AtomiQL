@@ -2,7 +2,7 @@ import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import { atom } from 'jotai';
 import React from 'react';
-import { getASTFromQuery, getQueryResponseType, parseQuery } from './AST/AST';
+import { getASTFromQuery, parseQuery } from './AST/AST';
 import {
   AtomData,
   AtomiAtomContainer,

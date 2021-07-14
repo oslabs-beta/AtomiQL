@@ -1,20 +1,36 @@
+/* eslint-disable import/prefer-default-export */
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { graphql, visit, parse, print } from 'graphql'
+import { graphql, DocumentNode } from 'graphql';
+import { PathObject, Resolvers } from '../../types';
+import { GraphQLSchemaFull, TypeMapObj } from './getTypeMapObj';
 
-const { getTypeMapObj } = require("./getTypeMapObj");
+const { getTypeMapObj } = require('./getTypeMapObj');
 
-const getQueryField = (executableSchema, queryName) =>
-  executableSchema._queryType._fields[queryName];
+const getQueryField = (
+  executableSchema: GraphQLSchemaFull,
+  queryName: string
+): GraphQLSchemaFull => executableSchema._queryType._fields[queryName];
 
-const isNamedTypeNode = (node) => node.kind === "NamedType";
-const typeNodeHasType = (node) => !!node.type;
+const isNamedTypeNode = (node: { kind: string }) => node.kind === 'NamedType';
+const typeNodeHasType = (node: { type: any }) => !!node.type;
 
-const getQueryResponseTypeCustomObj = (executableSchema, queryName) => {
+interface QueryResponseTypeCustomObj {
+  isResponseDefinition: boolean;
+  name?: any;
+  [key: string]: any;
+  [key: number]: any;
+}
+
+const getQueryResponseTypeCustomObj = (
+  executableSchema: GraphQLSchemaFull,
+  queryName: string
+) => {
   const queryField = getQueryField(executableSchema, queryName);
-  const queryResponseType = queryField.astNode;
-  const output = { isResponseDefinition: true };
-  const recurseType = (node) => {
+  console.log(`queryField`, queryField);
+  const queryResponseType = queryField.astNode as GraphQLSchemaFull;
+  const output: QueryResponseTypeCustomObj = { isResponseDefinition: true };
+  const recurseType = (node: GraphQLSchemaFull) => {
     if (isNamedTypeNode(node)) {
       output.name = node.name.value;
     }
@@ -28,10 +44,10 @@ const getQueryResponseTypeCustomObj = (executableSchema, queryName) => {
 };
 
 const generateQueryResolver = (
-  resolvers,
-  executableSchema,
-  queries,
-  serverResponse
+  resolvers: Resolvers,
+  executableSchema: GraphQLSchemaFull,
+  queries: string[],
+  serverResponse: any
 ) => {
   const newResolver = {
     Query: {},
@@ -60,18 +76,31 @@ const generateQueryResolver = (
   return newResolver;
 };
 
-const generateFieldResolvers = (resolvers, pathToResolvers, typeMapObj) => {
-  const newResolver = {};
-  const recurse = (pathToNode, typeDefNode, typeName) => {
+interface TypeDefNode {
+  [key: string]: ResponseType;
+}
+
+const generateFieldResolvers = (
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  typeMapObj: TypeMapObj
+) => {
+  const newResolver: Resolvers = {};
+  const recurse = (
+    pathToNode: PathObject,
+    typeDefNode: TypeDefNode,
+    typeName: string
+  ) => {
     for (const [key, val] of Object.entries(pathToNode)) {
       if (val.resolveLocally) {
+        const resolver = resolvers[typeName] as Resolvers;
         newResolver[typeName] = {
           ...newResolver[typeName],
-          [key]: resolvers[typeName][key],
+          [key]: resolver[key],
         };
       } else {
-        const typeName = getTypeName(typeDefNode[key]);
-        recurse(val, typeMapObj[typeName], typeName);
+        const newTypeName = getTypeName(typeDefNode[key]);
+        recurse(val, typeMapObj[newTypeName], newTypeName);
       }
     }
   };
@@ -86,10 +115,10 @@ const generateFieldResolvers = (resolvers, pathToResolvers, typeMapObj) => {
 };
 
 const generateOneOffResolver = (
-  resolvers,
-  pathToResolvers,
-  executableSchema,
-  serverResponse
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  executableSchema: GraphQLSchemaFull,
+  serverResponse: any
 ) => {
   const typeMapObj = getTypeMapObj(executableSchema);
   const queries = Object.keys(pathToResolvers);
@@ -107,17 +136,22 @@ const generateOneOffResolver = (
   return { ...queryResolver, ...fieldResolvers };
 };
 
-const getTypeName = (responseType) => {
+interface ResponseType {
+  ofType: ResponseType;
+  name: string;
+}
+
+const getTypeName = (responseType: ResponseType): string => {
   if (responseType.name) return responseType.name;
   return getTypeName(responseType.ofType);
 };
 
 const createLocalExecutableSchema = (
-  typeDefs,
-  resolvers,
-  pathToResolvers,
-  executableSchema,
-  serverResponse
+  typeDefs: DocumentNode,
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  executableSchema: GraphQLSchemaFull,
+  serverResponse: any
 ) => {
   const generatedResolver = generateOneOffResolver(
     resolvers,
@@ -132,17 +166,17 @@ const createLocalExecutableSchema = (
 };
 
 export const resolveQueryWithLocalFields = async (
-  typeDefs,
-  resolvers,
-  pathToResolvers,
-  serverResponse,
-  query
+  typeDefs: DocumentNode,
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  serverResponse: any,
+  query: string
 ) => {
   const executableSchema = makeExecutableSchema({
     typeDefs,
     resolvers,
-  });
-  console.log(`executableSchema`, executableSchema)
+  }) as GraphQLSchemaFull;
+
   const newExecutableSchema = createLocalExecutableSchema(
     typeDefs,
     resolvers,
@@ -150,6 +184,6 @@ export const resolveQueryWithLocalFields = async (
     executableSchema,
     serverResponse
   );
-  console.log(`newExecutableSchema`, newExecutableSchema)
+
   return (await graphql(newExecutableSchema, query)).data;
 };
