@@ -6,8 +6,8 @@ import useQuery, { GetAtom } from '../useQuery';
 import { AtomiProvider, AtomiContext } from '../atomiContext';
 
 const client = {
-  url: "https://graphql-pokemon2.vercel.app"
-}
+  url: 'https://graphql-pokemon2.vercel.app',
+};
 
 describe('AtomiContext', () => {
   afterEach(() => {
@@ -55,9 +55,7 @@ describe('UseQuery', () => {
       }
     `;
     const wrapper: React.ComponentType = ({ children }): React.ReactElement => (
-      <AtomiProvider client={client}>
-        {children}
-      </AtomiProvider>
+      <AtomiProvider client={client}>{children}</AtomiProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(() => useQuery(query), {
@@ -78,9 +76,7 @@ describe('UseQuery', () => {
       }
     `;
     const wrapper: React.ComponentType = ({ children }): React.ReactElement => (
-      <AtomiProvider client={client}>
-        {children}
-      </AtomiProvider>
+      <AtomiProvider client={client}>{children}</AtomiProvider>
     );
 
     const { waitForNextUpdate } = renderHook(() => useQuery(query), {
