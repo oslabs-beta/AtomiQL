@@ -5,6 +5,7 @@ import React from 'react';
 import { getASTFromQuery, parseQuery } from './AST/AST';
 import {
   AtomData,
+  AtomiAtom,
   AtomiAtomContainer,
   CacheContainer,
   PathObject,
@@ -34,7 +35,7 @@ const initialCache: CacheContainer = {
   resolvers: {},
   resolvePathToResolvers: () => ({}),
   getAtomiAtomContainer: () => ({
-    atom: atom({}),
+    atom: atom({}) as unknown as AtomiAtom,
     atomData: {
       loading: false,
       hasError: false,
@@ -71,18 +72,6 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
     };
     this.cacheContainer = cacheContainer;
   }
-
-  // resolvePathToResolvers = (pathToResolvers: PathObject) => {
-  //   const { resolvers, typeDefs } = this.cacheContainer;
-  //   const queryName = Object.keys(pathToResolvers)[0];
-  //   const { name: typeName } = getQueryResponseType(typeDefs, queryName);
-  //   const resolverType = resolvers[typeName] as Resolvers;
-
-  //   this.resolvePathToResolversRecurse(
-  //     pathToResolvers[queryName],
-  //     resolverType
-  //   );
-  // };
 
   // Update the pathToResolvers object with the resolved local state
   resolvePathToResolvers = (

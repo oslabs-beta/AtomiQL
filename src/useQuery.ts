@@ -45,6 +45,7 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const cachedAtom = cachedAtomContainer ? cachedAtomContainer.atom : null;
   // If there is no cached atom, set the active atom to be a new atom
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
+  const thing = atom(initialAtomData);
   // Hooke into the activeAtom
   const [atomData, setAtom] = useAtom(activeAtom);
 
