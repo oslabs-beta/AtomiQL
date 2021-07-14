@@ -6,7 +6,7 @@ import {
   DirectiveNode,
   print,
 } from 'graphql';
-import { PathObject, Query } from './types';
+import { PathObject, Query, ResponseData } from './types';
 
 export type Directives = readonly DirectiveNode[];
 
@@ -187,4 +187,31 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
     foundClientDirective,
     sendQueryToServer,
   };
+};
+
+export const flattenQuery = (atomData: ResponseData) => {
+  const output: ResponseData = {};
+
+  const flattenRecursive = (queryResult: any) => {
+    if (Array.isArray(queryResult)) {
+      queryResult.forEach((result) => {
+        flattenRecursive(result);
+      });
+    } else {
+      if (queryResult.__typename && queryResult.id) {
+        const uniqueId: string = `${queryResult.__typename}-${queryResult.id}`;
+        output[uniqueId] = queryResult;
+      }
+      Object.keys(queryResult).forEach((queryKey) => {
+        if (typeof queryResult[queryKey] === 'object') {
+          flattenRecursive(queryResult[queryKey]);
+        }
+      });
+    }
+  };
+
+  flattenRecursive(atomData);
+  console.log('output of flattenQuery', output);
+
+  return output;
 };
