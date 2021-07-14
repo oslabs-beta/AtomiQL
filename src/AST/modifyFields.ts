@@ -3,7 +3,6 @@
 /* eslint-disable import/prefer-default-export */
 
 import {
-  ASTNode,
   DocumentNode,
   FieldNode,
   SelectionNode,
