@@ -3,7 +3,7 @@ import { GraphQLClient } from 'graphql-request';
 import { isEqual } from 'lodash';
 import { atom } from 'jotai';
 import React from 'react';
-import { flattenQuery, getASTFromQuery, parseQuery, } from './AST/AST';
+import { flattenQuery, getASTFromQuery, parseQuery } from './AST/AST';
 
 import {
   AtomData,
@@ -197,7 +197,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
         resolvers,
         pathToResolvers,
         strippedQuery
-      )
+      );
       this.writeAtom(atomiAtomContainer, res);
     }
   };
