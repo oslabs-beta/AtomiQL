@@ -3,7 +3,6 @@ import { GraphQLClient } from 'graphql-request';
 import { Atom, PrimitiveAtom, WritableAtom } from 'jotai';
 import { SetStateAction } from 'react';
 
-
 export type ResponseData = { [key: string]: any };
 
 export type Query = string | DocumentNode;
