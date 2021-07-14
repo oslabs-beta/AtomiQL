@@ -45,7 +45,7 @@ export interface AtomData {
 //   onMount?: OnMount<SetStateAction<AtomData>>;
 // } & WithInitialValue<AtomData>;
 
-export type AtomiAtom = PrimitiveAtom<AtomData>
+export type AtomiAtom = PrimitiveAtom<AtomData>;
 
 export interface AtomiAtomContainer {
   originalQuery: string;
