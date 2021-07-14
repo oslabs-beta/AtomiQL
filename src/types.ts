@@ -1,12 +1,34 @@
 import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import {
-  OnMount,
+  // OnMount,
   SetStateAction,
-  WithInitialValue,
-  Write,
-  Atom,
-} from 'jotai/core/types';
+  // WithInitialValue,
+  // Write,
+  // Getter,
+  // Setter,
+  // Atom,
+  PrimitiveAtom,
+} from 'jotai';
+
+// export type SetAtom<Update> = undefined extends Update
+//   ? (update?: Update) => void | Promise<void>
+//   : (update: Update) => void | Promise<void>
+
+// export type OnUnmount = () => void
+// export type OnMount<Update> = <S extends SetAtom<Update>>(
+//   setAtom: S
+// ) => OnUnmount | void
+
+// export type WithInitialValue<Value> = {
+//   init: Value
+// }
+
+// export type Write<Update> = (
+//   get: Getter,
+//   set: Setter,
+//   update: Update
+// ) => void | Promise<void>
 
 export type ResponseData = { [key: string]: any };
 
@@ -18,15 +40,17 @@ export interface AtomData {
   hasError: boolean;
 }
 
-export type AtomiAtom = Atom<AtomData> & {
-  write: Write<SetStateAction<AtomData>>;
-  onMount?: OnMount<SetStateAction<AtomData>>;
-} & WithInitialValue<AtomData>;
+// export type AtomiAtom = Atom<AtomData> & {
+//   write: Write<SetStateAction<AtomData>>;
+//   onMount?: OnMount<SetStateAction<AtomData>>;
+// } & WithInitialValue<AtomData>;
+
+export type AtomiAtom = PrimitiveAtom<AtomData>
 
 export interface AtomiAtomContainer {
   originalQuery: string;
   variables: any;
-  atom: AtomiAtom;
+  atom: AtomiAtom | any; // see if this can be avoided
   atomData: AtomData;
   setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>;
 }
