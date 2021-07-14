@@ -5,12 +5,8 @@ import {
   FieldNode,
   DirectiveNode,
   print,
-  ListTypeNode,
-  NonNullTypeNode,
-  NamedTypeNode,
-  TypeNode,
 } from 'graphql';
-import { PathObject, Query } from '../types';
+import { PathObject, Query, ResponseData } from '../types';
 import { addFields } from './modifyFields';
 
 export type Directives = readonly DirectiveNode[];
@@ -86,7 +82,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
           // Save the number of child Fields this Field has
           // in the format { start: number-of-child-fields }
           selectionSetLengths.push({ start: selectionSet.selections.length });
-          i++;
+          i += 1;
         }
       },
       leave(node: FieldNode) {
@@ -105,7 +101,7 @@ export const removeFieldsWithClientDirectiveAndCreatePathToResolvers = (
         // Save the number of child Fields this Field now has after editing the AST
         // in the format { end: number-of-child-fields }
         if (selectionSet) {
-          i--;
+          i -= 1;
           const selection = selectionSetLengths[i];
           selection.end = selectionSet.selections.length;
 
@@ -155,56 +151,6 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
   }
 };
 
-// const getQueryFromSchema = (schema: DocumentNode) => {
-//   return visit(schema, {
-//     ObjectTypeDefinition: {
-//       enter(node) {
-//         if (node.name.value === 'Query') {
-//           return node;
-//         } else return null;
-//       },
-//     },
-//   });
-// };
-
-// const typeNodeHasType = (
-//   variableToCheck: any
-// ): variableToCheck is ListTypeNode | NonNullTypeNode =>
-//   (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'ListType' ||
-//   (variableToCheck as ListTypeNode | NonNullTypeNode).kind === 'NonNullType';
-
-// const isNamedTypeNode = (
-//   variableToCheck: any
-// ): variableToCheck is NamedTypeNode =>
-//   (variableToCheck as NamedTypeNode).kind === 'NamedType';
-
-// export const getQueryResponseType = (
-//   schema: DocumentNode,
-//   queryName: string
-// ) => {
-//   const query = getQueryFromSchema(schema);
-//   const output: { kinds: string[]; name: string } = { kinds: [], name: '' };
-//   visit(query, {
-//     FieldDefinition: {
-//       enter(node) {
-//         if (node.name.value === queryName) {
-//           const recurseType = (node: TypeNode) => {
-//             if (isNamedTypeNode(node)) {
-//               output.name = node.name.value;
-//             }
-//             if (typeNodeHasType(node)) {
-//               output.kinds.push(node.kind);
-//               recurseType(node.type);
-//             }
-//           };
-//           recurseType(node.type);
-//         }
-//       },
-//     },
-//   });
-//   return output;
-// };
-
 export const stripClientDirectivesFromQuery = (query: Query): string => {
   const queryAST = getASTFromQuery(query);
 
@@ -238,4 +184,30 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
     sendQueryToServer,
     strippedQuery,
   };
+};
+
+export const flattenQuery = (atomData: ResponseData) => {
+  const output: ResponseData = {};
+
+  const flattenRecursive = (queryResult: any) => {
+    if (Array.isArray(queryResult)) {
+      queryResult.forEach((result) => {
+        flattenRecursive(result);
+      });
+    } else {
+      if (queryResult.__typename && queryResult.id) {
+        const uniqueId: string = `${queryResult.__typename}-${queryResult.id}`;
+        output[uniqueId] = queryResult;
+      }
+      Object.keys(queryResult).forEach((queryKey) => {
+        if (typeof queryResult[queryKey] === 'object') {
+          flattenRecursive(queryResult[queryKey]);
+        }
+      });
+    }
+  };
+
+  flattenRecursive(atomData);
+
+  return output;
 };

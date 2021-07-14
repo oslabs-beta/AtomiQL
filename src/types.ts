@@ -16,6 +16,8 @@ export interface AtomData {
 export type AtomiAtom = PrimitiveAtom<AtomData>;
 
 export interface AtomiAtomContainer {
+  originalQuery: string;
+  variables: any;
   atom: AtomiAtom;
   atomData: AtomData;
   setAtom?: (update: SetStateAction<AtomData>) => void | Promise<void>;
@@ -38,8 +40,14 @@ export interface PathObject {
 export interface CacheContainer {
   url: string;
   readQuery: (arg1: string) => ReadQueryOutput;
-  cache: {
+  atomCache: {
     [key: string]: AtomiAtomContainer;
+  };
+  gqlNodeCache: {
+    [key: string]: Object | null;
+  };
+  queryAtomMap: {
+    [key: string]: Set<string>;
   };
   setCache: (arg1: string, arg2: AtomiAtomContainer) => void;
   graphQLClient: GraphQLClient;

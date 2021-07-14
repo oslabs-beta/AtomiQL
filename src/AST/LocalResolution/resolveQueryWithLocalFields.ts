@@ -27,7 +27,6 @@ const getQueryResponseTypeCustomObj = (
   queryName: string
 ) => {
   const queryField = getQueryField(executableSchema, queryName);
-  console.log(`queryField`, queryField);
   const queryResponseType = queryField.astNode as unknown as GraphQLSchemaFull;
   const output: QueryResponseTypeCustomObj = { isResponseDefinition: true };
   const recurseType = (node: GraphQLSchemaFull) => {

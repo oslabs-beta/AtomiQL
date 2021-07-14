@@ -1,9 +1,18 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
 import { AtomiContext } from './atomiContext';
-import { AtomData, AtomiAtom, Query, ResponseData } from './types';
+import {
+  AtomData,
+  AtomiAtom,
+  Query,
+  ResponseData,
+  PathObject,
+  Resolvers,
+} from './types';
 import { parseQuery } from './AST/AST';
 import { resolveQueryWithLocalFields } from './AST/LocalResolution/resolveQueryWithLocalFields';
+import { GraphQLClient } from 'graphql-request';
+import { DocumentNode } from 'graphql';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -20,22 +29,55 @@ interface UseQueryInput {
 
 type Result = { [key: string]: any };
 
+export const getQueryResult = async (
+  sendQueryToServer: boolean,
+  graphQLClient: GraphQLClient,
+  updatedAST: DocumentNode,
+  variables: any,
+  foundClientDirective: boolean,
+  typeDefs: DocumentNode,
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  strippedQuery: string
+) => {
+  let result: Result = {};
+  // Query the server if Query is valid
+  if (sendQueryToServer) {
+    result = await graphQLClient.request(updatedAST, variables);
+  }
+  // If there are @client directives in the query, merge the result from
+  // the server with local state from the resolvers for those Fields
+  if (foundClientDirective) {
+    // resolvePathToResolvers(pathToResolvers, resolvers);
+    // mergeServerAndLocalState(result, pathToResolvers);
+    result = (await resolveQueryWithLocalFields(
+      typeDefs,
+      resolvers,
+      pathToResolvers,
+      result,
+      strippedQuery
+    )) as Result;
+  }
+  return result;
+};
+
 const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const isLocal = input && input.isLocal;
   // Parse the graphQL query
   const {
     updatedAST,
     strippedQuery,
-    queryString,
+    queryString: originalQuery,
     pathToResolvers,
     foundClientDirective,
     sendQueryToServer,
   } = parseQuery(query);
+  let queryString = originalQuery;
+  if (input && input.variables) queryString += JSON.stringify(input.variables);
   // Access the cache
   const {
     setCache,
     graphQLClient,
-    resolvePathToResolvers,
     resolvers,
     getAtomiAtomContainer,
     typeDefs,
@@ -45,9 +87,17 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const cachedAtom = cachedAtomContainer ? cachedAtomContainer.atom : null;
   // If there is no cached atom, set the active atom to be a new atom
   const activeAtom: AtomiAtom = cachedAtom || atom(initialAtomData);
-  const thing = atom(initialAtomData);
   // Hooke into the activeAtom
   const [atomData, setAtom] = useAtom(activeAtom);
+
+  const variables = input ? input.variables : undefined;
+
+  const setCacheContents = {
+    originalQuery,
+    variables,
+    atom: activeAtom,
+    setAtom,
+  };
 
   useEffect(() => {
     (async () => {
@@ -59,31 +109,22 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           hasError: false,
         };
         try {
-          let result: Result = {};
-          // Query the server if Query is valid
-          if (sendQueryToServer) {
-            const variables = input ? input.variables : undefined;
-            result = await graphQLClient.request(updatedAST, variables);
-          }
-          // If there are @client directives in the query, merge the result from
-          // the server with local state from the resolvers for those Fields
-          if (foundClientDirective) {
-            // resolvePathToResolvers(pathToResolvers, resolvers);
-            // mergeServerAndLocalState(result, pathToResolvers);
-            result = (await resolveQueryWithLocalFields(
-              typeDefs,
-              resolvers,
-              pathToResolvers,
-              result,
-              strippedQuery
-            )) as Result;
-          }
+          const result = await getQueryResult(
+            sendQueryToServer,
+            graphQLClient,
+            updatedAST,
+            variables,
+            foundClientDirective,
+            typeDefs,
+            resolvers,
+            pathToResolvers,
+            strippedQuery
+          );
           newAtomData.data = result;
           // Set the response in the cache
           setCache(queryString, {
-            atom: activeAtom,
+            ...setCacheContents,
             atomData: newAtomData,
-            setAtom,
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
@@ -92,9 +133,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           newAtomData.hasError = true;
           // Set the cache
           setCache(queryString, {
-            atom: activeAtom,
+            ...setCacheContents,
             atomData: newAtomData,
-            setAtom,
           });
           // Update the value of the Jotai atom
           setAtom(newAtomData);
@@ -104,9 +144,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
       if (cachedAtomContainer && !cachedAtomContainer.setAtom) {
         // Save the setAtom function so it becomes accessible
         setCache(queryString, {
-          atom: activeAtom,
+          ...setCacheContents,
           atomData,
-          setAtom,
         });
       }
       // If the query is Local and there is no cache hit
@@ -119,9 +158,8 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           hasError: false,
         };
         setCache(queryString, {
-          atom: activeAtom,
+          ...setCacheContents,
           atomData: newAtomData,
-          setAtom,
         });
       }
     })();
