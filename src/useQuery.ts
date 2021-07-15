@@ -1,8 +1,8 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
 import { GraphQLClient } from 'graphql-request';
-import { AtomiContext } from './atomiContext';
 import { DocumentNode } from 'graphql';
+import { AtomiContext } from './atomiContext';
 import {
   AtomData,
   AtomiAtom,
