@@ -1,6 +1,8 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
+import { GraphQLClient } from 'graphql-request';
 import { AtomiContext } from './atomiContext';
+import { DocumentNode } from 'graphql';
 import {
   AtomData,
   AtomiAtom,
@@ -11,8 +13,6 @@ import {
 } from './types';
 import { parseQuery } from './AST/AST';
 import { resolveQueryWithLocalFields } from './AST/LocalResolution/resolveQueryWithLocalFields';
-import { GraphQLClient } from 'graphql-request';
-import { DocumentNode } from 'graphql';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 

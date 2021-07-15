@@ -61,7 +61,7 @@ const generateQueryResolver = (
       [query]() {
         if (serverResponse) return serverResponse[query];
         if (queryResponseTypeCustomObj.ListType) return [{}];
-        else return {};
+        return {};
       },
     };
   });

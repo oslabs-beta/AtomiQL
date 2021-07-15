@@ -267,7 +267,9 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
         data: newData,
       }));
     } else {
+      // eslint-disable-next-line no-console
       console.error('Cannot writeAtom if setAtom is undefined.');
+      // eslint-disable-next-line no-console
       throw new Error('Cannot writeAtom if setAtom is undefined.');
     }
   };
@@ -280,6 +282,7 @@ export class AtomiProvider extends React.Component<AtomiProviderProps> {
     const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
     if (!atomiAtomContainer) {
       // If the query is not cached, you cannot read it
+      // eslint-disable-next-line no-console
       console.error('Query not cached');
       throw new Error('Query not cached');
     }
