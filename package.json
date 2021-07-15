@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "graphql": "^15.5.0",
+    "graphql-tools": "^7.0.5",
     "lodash": "^4.17.21"
   }
 }

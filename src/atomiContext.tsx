@@ -1,11 +1,13 @@
+import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
 import { isEqual } from 'lodash';
 import { atom } from 'jotai';
 import React from 'react';
-import { parseQuery, flattenQuery } from './AST';
+import { flattenQuery, getASTFromQuery, parseQuery } from './AST/AST';
 
 import {
   AtomData,
+  AtomiAtom,
   AtomiAtomContainer,
   CacheContainer,
   PathObject,
@@ -13,11 +15,18 @@ import {
   Resolvers,
   ResponseData,
 } from './types';
+import { getQueryResult } from './useQuery';
 
-interface MyProps {
+interface Client {
   url: string;
   resolvers?: Resolvers;
+  typeDefs?: DocumentNode | string;
 }
+interface AtomiProviderProps {
+  client: Client;
+}
+
+const MOCK_TYPE_DEF = 'type Default { name: String }';
 
 const initialCache: CacheContainer = {
   url: '',
@@ -32,7 +41,7 @@ const initialCache: CacheContainer = {
   resolvers: {},
   resolvePathToResolvers: () => ({}),
   getAtomiAtomContainer: () => ({
-    atom: atom({}),
+    atom: atom({}) as unknown as AtomiAtom,
     atomData: {
       loading: false,
       hasError: false,
@@ -43,16 +52,19 @@ const initialCache: CacheContainer = {
     variables: {},
   }),
   writeQuery: () => ({}),
+  typeDefs: getASTFromQuery(MOCK_TYPE_DEF),
 };
 
 export const AtomiContext = React.createContext(initialCache);
 
-export class AtomiProvider extends React.Component<MyProps> {
+export class AtomiProvider extends React.Component<AtomiProviderProps> {
   cacheContainer: CacheContainer;
 
-  constructor(props: MyProps) {
+  constructor(props: AtomiProviderProps) {
     super(props);
-    const { url, resolvers } = this.props;
+    const {
+      client: { url, resolvers, typeDefs },
+    } = this.props;
     const graphQLClient = new GraphQLClient(url);
     const cacheContainer: CacheContainer = {
       url,
@@ -66,6 +78,7 @@ export class AtomiProvider extends React.Component<MyProps> {
       resolvePathToResolvers: this.resolvePathToResolvers,
       getAtomiAtomContainer: this.getAtomiAtomContainer,
       writeQuery: this.writeQuery,
+      typeDefs: getASTFromQuery(typeDefs || MOCK_TYPE_DEF),
     };
     this.cacheContainer = cacheContainer;
   }
@@ -163,11 +176,28 @@ export class AtomiProvider extends React.Component<MyProps> {
 
   // queries the server given a query string
   reQuery = async (query: string) => {
-    const { graphQLClient } = this.cacheContainer;
+    const { graphQLClient, typeDefs, resolvers } = this.cacheContainer;
     if (this.cacheContainer.atomCache[query]) {
       const atomiAtomContainer = this.cacheContainer.atomCache[query];
       const { originalQuery, variables } = atomiAtomContainer;
-      const res = await graphQLClient.request(originalQuery, variables);
+      const {
+        updatedAST,
+        strippedQuery,
+        pathToResolvers,
+        foundClientDirective,
+        sendQueryToServer,
+      } = parseQuery(originalQuery);
+      const res = await getQueryResult(
+        sendQueryToServer,
+        graphQLClient,
+        updatedAST,
+        variables,
+        foundClientDirective,
+        typeDefs,
+        resolvers,
+        pathToResolvers,
+        strippedQuery
+      );
       this.writeAtom(atomiAtomContainer, res);
     }
   };
@@ -237,7 +267,9 @@ export class AtomiProvider extends React.Component<MyProps> {
         data: newData,
       }));
     } else {
+      // eslint-disable-next-line no-console
       console.error('Cannot writeAtom if setAtom is undefined.');
+      // eslint-disable-next-line no-console
       throw new Error('Cannot writeAtom if setAtom is undefined.');
     }
   };
@@ -250,6 +282,7 @@ export class AtomiProvider extends React.Component<MyProps> {
     const atomiAtomContainer = this.getAtomiAtomContainer(queryString);
     if (!atomiAtomContainer) {
       // If the query is not cached, you cannot read it
+      // eslint-disable-next-line no-console
       console.error('Query not cached');
       throw new Error('Query not cached');
     }

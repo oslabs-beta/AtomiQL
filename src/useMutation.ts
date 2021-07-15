@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { AtomData, CacheContainer, Query } from './types';
 import { AtomiContext } from './atomiContext';
-import { parseQuery } from './AST';
+import { parseQuery } from './AST/AST';
 
 const initialData: AtomData = {
   loading: false,

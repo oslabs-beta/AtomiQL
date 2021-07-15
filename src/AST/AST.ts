@@ -6,7 +6,8 @@ import {
   DirectiveNode,
   print,
 } from 'graphql';
-import { PathObject, Query, ResponseData } from './types';
+import { PathObject, Query, ResponseData } from '../types';
+import { addFields } from './modifyFields';
 
 export type Directives = readonly DirectiveNode[];
 
@@ -22,6 +23,7 @@ export interface ParseQueryResponse {
   pathToResolvers: PathObject;
   foundClientDirective: boolean;
   sendQueryToServer: boolean;
+  strippedQuery: string;
 }
 
 export const getASTFromQuery = (query: Query): DocumentNode =>
@@ -149,29 +151,23 @@ export const removeEmptyFields = (pathToResolvers: PathObject) => {
   }
 };
 
-// Use this function to get a simple definition of the structure of a graphQL query
-export const getQueryStructure = (AST: DocumentNode): PathObject => {
-  const queryStructure: PathObject = {};
-  let pathToResolvers = queryStructure;
-  visit(AST, {
-    Field: {
-      enter(node) {
-        const name: string = node.name.value;
-        pathToResolvers[name] = {};
-        pathToResolvers[name].parent = pathToResolvers;
-        pathToResolvers = pathToResolvers[name];
-      },
-      leave() {
-        pathToResolvers = pathToResolvers.parent;
+export const stripClientDirectivesFromQuery = (query: Query): string => {
+  const queryAST = getASTFromQuery(query);
+
+  const strippedQuery = visit(queryAST, {
+    Directive: {
+      leave(node) {
+        if (node.name.value === 'client') return null;
       },
     },
   });
-  return queryStructure;
+  return print(strippedQuery);
 };
 
 export const parseQuery = (query: Query): ParseQueryResponse => {
   // Get the AST from the Query
-  const AST = getASTFromQuery(query);
+  const AST = addFields(getASTFromQuery(query), ['__typename']);
+  const strippedQuery = stripClientDirectivesFromQuery(AST);
   // The updated AST has had all fields with @client directives removed
   // pathToResolvers is an object that describes the path to the resolvers for any @client directives
   const {
@@ -186,6 +182,7 @@ export const parseQuery = (query: Query): ParseQueryResponse => {
     queryString: print(AST),
     foundClientDirective,
     sendQueryToServer,
+    strippedQuery,
   };
 };
 
@@ -211,7 +208,6 @@ export const flattenQuery = (atomData: ResponseData) => {
   };
 
   flattenRecursive(atomData);
-  console.log('output of flattenQuery', output);
 
   return output;
 };

@@ -5,6 +5,10 @@ import { gql } from 'graphql-request';
 import useQuery, { GetAtom } from '../useQuery';
 import { AtomiProvider, AtomiContext } from '../atomiContext';
 
+const client = {
+  url: 'https://graphql-pokemon2.vercel.app',
+};
+
 describe('AtomiContext', () => {
   afterEach(() => {
     cleanup();
@@ -12,7 +16,7 @@ describe('AtomiContext', () => {
 
   test('Component under AtomiProvider should render', () => {
     render(
-      <AtomiProvider url="https://graphql-pokemon2.vercel.app">
+      <AtomiProvider client={client}>
         <div>Test Render</div>
       </AtomiProvider>
     );
@@ -27,7 +31,7 @@ describe('AtomiContext', () => {
     const url = 'https://graphql-pokemon2.vercel.app';
 
     render(
-      <AtomiProvider url={url}>
+      <AtomiProvider client={client}>
         <CheckContext />
       </AtomiProvider>
     );
@@ -51,9 +55,7 @@ describe('UseQuery', () => {
       }
     `;
     const wrapper: React.ComponentType = ({ children }): React.ReactElement => (
-      <AtomiProvider url="https://graphql-pokemon2.vercel.app">
-        {children}
-      </AtomiProvider>
+      <AtomiProvider client={client}>{children}</AtomiProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(() => useQuery(query), {
@@ -74,9 +76,7 @@ describe('UseQuery', () => {
       }
     `;
     const wrapper: React.ComponentType = ({ children }): React.ReactElement => (
-      <AtomiProvider url="https://graphql-pokemon2.vercel.app">
-        {children}
-      </AtomiProvider>
+      <AtomiProvider client={client}>{children}</AtomiProvider>
     );
 
     const { waitForNextUpdate } = renderHook(() => useQuery(query), {

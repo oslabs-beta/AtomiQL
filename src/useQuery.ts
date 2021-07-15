@@ -1,9 +1,18 @@
 import { atom, useAtom } from 'jotai';
 import { useEffect, useContext } from 'react';
+import { GraphQLClient } from 'graphql-request';
+import { DocumentNode } from 'graphql';
 import { AtomiContext } from './atomiContext';
-import { AtomData, AtomiAtom, Query, ResponseData } from './types';
-import { parseQuery } from './AST';
-import { mergeServerAndLocalState } from './utils';
+import {
+  AtomData,
+  AtomiAtom,
+  Query,
+  ResponseData,
+  PathObject,
+  Resolvers,
+} from './types';
+import { parseQuery } from './AST/AST';
+import { resolveQueryWithLocalFields } from './AST/LocalResolution/resolveQueryWithLocalFields';
 
 type AtomDataArray = [null | ResponseData, boolean, boolean];
 
@@ -18,11 +27,46 @@ interface UseQueryInput {
   isLocal?: boolean;
 }
 
+type Result = { [key: string]: any };
+
+export const getQueryResult = async (
+  sendQueryToServer: boolean,
+  graphQLClient: GraphQLClient,
+  updatedAST: DocumentNode,
+  variables: any,
+  foundClientDirective: boolean,
+  typeDefs: DocumentNode,
+  resolvers: Resolvers,
+  pathToResolvers: PathObject,
+  strippedQuery: string
+) => {
+  let result: Result = {};
+  // Query the server if Query is valid
+  if (sendQueryToServer) {
+    result = await graphQLClient.request(updatedAST, variables);
+  }
+  // If there are @client directives in the query, merge the result from
+  // the server with local state from the resolvers for those Fields
+  if (foundClientDirective) {
+    // resolvePathToResolvers(pathToResolvers, resolvers);
+    // mergeServerAndLocalState(result, pathToResolvers);
+    result = (await resolveQueryWithLocalFields(
+      typeDefs,
+      resolvers,
+      pathToResolvers,
+      result,
+      strippedQuery
+    )) as Result;
+  }
+  return result;
+};
+
 const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const isLocal = input && input.isLocal;
   // Parse the graphQL query
   const {
     updatedAST,
+    strippedQuery,
     queryString: originalQuery,
     pathToResolvers,
     foundClientDirective,
@@ -34,9 +78,9 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
   const {
     setCache,
     graphQLClient,
-    resolvePathToResolvers,
     resolvers,
     getAtomiAtomContainer,
+    typeDefs,
   } = useContext(AtomiContext);
   // Look for a cachedAtomContainer
   const cachedAtomContainer = getAtomiAtomContainer(queryString);
@@ -65,17 +109,17 @@ const useQuery = (query: Query, input?: UseQueryInput): AtomDataArray => {
           hasError: false,
         };
         try {
-          let result = {};
-          // Query the server if Query is valid
-          if (sendQueryToServer) {
-            result = await graphQLClient.request(updatedAST, variables);
-          }
-          // If there are @client directives in the query, merge the result from
-          // the server with local state from the resolvers for those Fields
-          if (foundClientDirective) {
-            resolvePathToResolvers(pathToResolvers, resolvers);
-            mergeServerAndLocalState(result, pathToResolvers);
-          }
+          const result = await getQueryResult(
+            sendQueryToServer,
+            graphQLClient,
+            updatedAST,
+            variables,
+            foundClientDirective,
+            typeDefs,
+            resolvers,
+            pathToResolvers,
+            strippedQuery
+          );
           newAtomData.data = result;
           // Set the response in the cache
           setCache(queryString, {

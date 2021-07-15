@@ -1,12 +1,7 @@
 import { DocumentNode } from 'graphql';
 import { GraphQLClient } from 'graphql-request';
-import {
-  OnMount,
-  SetStateAction,
-  WithInitialValue,
-  Write,
-  Atom,
-} from 'jotai/core/types';
+import { Atom, PrimitiveAtom, WritableAtom } from 'jotai';
+import { SetStateAction } from 'react';
 
 export type ResponseData = { [key: string]: any };
 
@@ -18,10 +13,7 @@ export interface AtomData {
   hasError: boolean;
 }
 
-export type AtomiAtom = Atom<AtomData> & {
-  write: Write<SetStateAction<AtomData>>;
-  onMount?: OnMount<SetStateAction<AtomData>>;
-} & WithInitialValue<AtomData>;
+export type AtomiAtom = PrimitiveAtom<AtomData>;
 
 export interface AtomiAtomContainer {
   originalQuery: string;
@@ -66,6 +58,7 @@ export interface CacheContainer {
   ) => void;
   getAtomiAtomContainer: (query: string) => AtomiAtomContainer;
   writeQuery: (query: string, newData: any) => void;
+  typeDefs: DocumentNode;
 }
 
 export interface ServerState {
