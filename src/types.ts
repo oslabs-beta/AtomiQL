@@ -29,7 +29,7 @@ export interface ReadQueryOutput {
 }
 
 export interface Resolvers {
-  [key: string]: Resolvers | (() => void);
+  [key: string]: Resolvers | ((...args: any[]) => void);
 }
 
 export interface PathObject {
