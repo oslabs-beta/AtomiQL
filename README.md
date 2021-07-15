@@ -11,6 +11,7 @@
   </a>
   <img src="https://img.shields.io/npm/l/atomiql">
   <img src="https://img.shields.io/github/last-commit/oslabs-beta/AtomiQL">
+  <img src="https://img.shields.io/github/workflow/status/oslabs-beta/AtomiQL/AtomiQL%20Github%20Actions">
 </p>
 
 ## Getting Started
