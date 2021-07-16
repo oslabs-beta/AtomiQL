@@ -1,7 +1,7 @@
+import { gql } from 'graphql-request';
 import { AtomiProvider, AtomiContext } from './atomiContext';
 import useQuery from './useQuery';
 import useMutation from './useMutation';
-import { gql } from 'graphql-request';
 import {
   ResponseData,
   AtomData,
