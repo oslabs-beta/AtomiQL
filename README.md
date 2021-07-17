@@ -23,7 +23,7 @@ $ npm install atomiql jotai
 
 ## Documentation
 
-Visit <a aria-label="atomiql learn" href="https://atomiql.com/docs">https://atomiql.com/docs</a> to view the full documentation.
+Visit <a aria-label="atomiql learn" href="https://www.atomiql.com/#/docs/getting-started">https://www.atomiql.com/#/docs/getting-started</a> to view the full documentation and try our application.
 
 
 ## Why use AtomiQL?
