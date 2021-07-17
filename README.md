@@ -23,14 +23,14 @@ $ npm install atomiql jotai
 
 ## Documentation
 
-Visit <a aria-label="atomiql learn" href="https://www.atomiql.com/#/docs/getting-started">https://www.atomiql.com/#/docs/getting-started</a> to view the full documentation and try our application.
+Visit <a aria-label="atomiql learn" href="https://www.atomiql.com/#/docs/getting-started">our documentation</a> to learn more about our application and try it out.
 
 
 ## Why use AtomiQL?
 
 AtomiQL is the first GraphQL client optimized and fully integrated with the Jotai atomic state management library. Our library allows your application to reap the benefits of traditional GraphQL clients along with the front-end performance optimizations of atomic state management libraries. 
 
-See our <a aria-label="atomiql demo" href="https://www.atomiql.com/#demo">website</a> for a demonstration of how our application works!  
+See our <a aria-label="atomiql demo" href="https://www.atomiql.com/#/#demo">website</a> for a demonstration of how our application works!  
 
 
 ## Contributing
