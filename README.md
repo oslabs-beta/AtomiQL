@@ -16,9 +16,9 @@
 
 ## Getting Started
 
-Starting to use AtomiQL is as easy as running this in your application!
+Starting to use AtomiQL is as easy as installing our package and Jotai in your application!
 ```sh
-$ npm install atomiql
+$ npm install atomiql jotai
 ```
 
 ## Documentation
